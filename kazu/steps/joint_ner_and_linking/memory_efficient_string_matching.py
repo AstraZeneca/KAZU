@@ -10,6 +10,7 @@ from kazu.steps import document_iterating_step, ParserDependentStep
 from kazu.utils.caching import kazu_disk_cache
 from kazu.utils.grouping import sort_then_group
 from kazu.utils.spacy_pipeline import SpacyPipelines, basic_spacy_pipeline, BASIC_PIPELINE_NAME
+from kazu.utils.utils import word_is_valid
 
 logger = logging.getLogger(__name__)
 
@@ -92,11 +93,6 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
 
         return case_insensitive_automaton
 
-    def _word_is_valid(
-        self, start_char: int, end_char: int, starts: set[int], ends: set[int]
-    ) -> bool:
-        return start_char in starts and end_char in ends
-
     def _case_matches(self, actual_match: str, original_casing: str, case_sensitive: bool) -> bool:
         # no need to check the strings actually match if it's not case sensitive
         # as this is already done as part of the string matching, so we know that
@@ -117,7 +113,7 @@ class MemoryEfficientStringMatchingStep(ParserDependentStep):
             match_key = next(iter(ontology_dict.keys()))[-1]
             start_index = end_index - len(match_key) + 1
             matched_text = original_text[start_index : end_index + 1]
-            if self._word_is_valid(start_index, end_index, starts, ends):
+            if word_is_valid(start_index, end_index, starts, ends):
 
                 for entity_class, entity_info_groups in sort_then_group(
                     ontology_dict.keys(), key_func=lambda x: x[0]

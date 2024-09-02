@@ -197,3 +197,9 @@ class Singleton(type):
             "anti-pattern, and this is a reason why!!!"
         )
         Singleton._instances.clear()
+
+
+def word_is_valid(start_char: int, end_char: int, starts: set[int], ends: set[int]) -> bool:
+    """Check if a string is a valid word by checking the start and end characters are in
+    predefined start/end sets of word boundaries."""
+    return start_char in starts and end_char in ends
