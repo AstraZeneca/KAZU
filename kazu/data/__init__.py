@@ -75,7 +75,8 @@ class AutoNameEnum(Enum):
         </details>
     """
 
-    def _generate_next_value_(name, start, count, last_values):
+    @staticmethod
+    def _generate_next_value_(name: str, start: int, count: int, last_values: list[Any]) -> Any:
         return name
 
 
