@@ -139,9 +139,7 @@ class ResourceEditor:
             index = options.index(default_syn.case_sensitive)
         else:
             index = 0
-        return cast(
-            bool, row[row_index].radio("case sensitive", options=options, index=index, key=key)
-        )
+        return row[row_index].radio("case sensitive", options=options, index=index, key=key)
 
     @staticmethod
     def _display_confidence_selector(
@@ -165,10 +163,7 @@ class ResourceEditor:
             index = options.index(default_syn.mention_confidence)
         else:
             index = 0
-        return cast(
-            MentionConfidence,
-            row[row_index].radio("confidence", options=options, index=index, key=key),
-        )
+        return row[row_index].radio("confidence", options=options, index=index, key=key)
 
     @staticmethod
     def display_case_sensitivity_and_confidence_selector(
