@@ -71,6 +71,7 @@ instance/
 # Sphinx documentation build
 docs/_build
 docs/_autosummary
+docs/gilda_contexts_cache/
 
 # PyBuilder
 target/

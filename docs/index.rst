@@ -23,6 +23,7 @@ Welcome to Kazu's documentation!
    Scaling with Ray <scaling_kazu>
    Kazu as a WebService <kazu_webservice>
    Using Kazu as a library <kazu_as_a_library>
+   Development Setup <development_setup>
    Changelog <changelog>
 
 |
