@@ -1,7 +1,7 @@
 Development Setup
 ==================
 
-Installing dependencies
+Installing Dependencies
 -----------------------
 To install all the dependencies required for development, navigate to the root of the repository and run:
 
@@ -11,6 +11,17 @@ To install all the dependencies required for development, navigate to the root o
 
 in a virtual environment.
 
+Git-lfs (Large File Storage) Setup
+-----------------------------------
+In this project we use Git-lfs to store large files. To install Git-lfs, follow the instructions on the `Git-lfs website <https://git-lfs.github.com/>`_.
+For instance on Mac it can be installed with brew. Once installed you should run the following two commands:
+
+.. code-block:: console
+
+    $ git lfs install
+    $ git lfs pull
+
+This will pull all the large files from the repository and allow you to push new branches to remote.
 
 Pre Commits
 ------------
