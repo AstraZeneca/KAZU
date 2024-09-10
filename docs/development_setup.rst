@@ -31,7 +31,7 @@ We use pre-commit to run checks on the codebase before committing. To install th
 
     $ pre-commit install
 
-All the pre-commit configurations can be found in the `.pre-commit-config.yaml` file in the root of the repository. 
+All the pre-commit configurations can be found in the `.pre-commit-config.yaml` file in the root of the repository.
 
 To run all the checks manually you can run:
 
