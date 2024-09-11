@@ -25,7 +25,6 @@ from bson import json_util
 from kazu.utils.string_normalizer import StringNormalizer
 from numpy import ndarray, float32, float16
 
-IS_SUBSPAN = "is_subspan"
 # BIO schema
 ENTITY_START_SYMBOL = "B"
 ENTITY_INSIDE_SYMBOL = "I"
