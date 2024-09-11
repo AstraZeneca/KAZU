@@ -225,7 +225,7 @@ class GLiNERStep(Step):
             self.label_sets.add(
                 tuple(
                     random.sample(
-                        self.gliner_class_prompt_to_entity_class.keys(),
+                        list(self.gliner_class_prompt_to_entity_class.keys()),
                         k=len(self.gliner_class_prompt_to_entity_class.keys()),
                     )
                 )
