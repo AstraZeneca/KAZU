@@ -17,6 +17,11 @@ from kazu.utils.string_normalizer import StringNormalizer
         ("JAK2", "JAK 2", "gene"),
         ("MPNs", "MPN", "gene"),
         ("TESTIN gene", "TESTIN GENE", "gene"),
+        (
+            "Chromosome X",
+            "CHROMOSOME X",
+            None,
+        ),  # Chromosome X and Chromosome 10 are different entities so don't normalize
     ),
 )
 def test_normalizer(original, expected, entity_class):
