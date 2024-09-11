@@ -79,6 +79,6 @@ Some of these require additional dependencies which are not included in the defa
 
 .. code-block:: console
 
-   $ pip install kazu[all-steps]
+   $ pip install 'kazu[all-steps]'
 
 Or you can install the specific required dependencies for just those steps out of the above that you are using - see their API docs for details.

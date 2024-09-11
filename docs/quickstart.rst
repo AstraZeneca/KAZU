@@ -45,7 +45,7 @@ If you intend to use `Mypy <https://mypy.readthedocs.io/en/stable/#>`_ on your o
 
 .. code-block:: console
 
-   $ pip install kazu[typed]
+   $ pip install 'kazu[typed]'
 
 This will pull in typing stubs for kazu's dependencies (such as `types-requests <https://pypi.org/project/types-requests/>`_ for `Requests <https://requests.readthedocs.io/en/latest/>`_)
 so that mypy has access to as much relevant typing information as possible when type checking your codebase. Otherwise (depending on mypy config), you may see errors when running mypy like:
