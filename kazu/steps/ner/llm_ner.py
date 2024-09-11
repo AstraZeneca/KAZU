@@ -163,32 +163,31 @@ class LLMNERStep(Step):
 
     @document_iterating_step
     def __call__(self, doc: Document) -> None:
-        results = []
-        for section in list(doc.sections):
+        results = {}
+        # reverse so that conflicts are resolved in the order they were found
+        # by overriding conflicted key in results dict
+        for section in reversed(list(doc.sections)):
             text = section.text
             raw_result, parsed_result = self.model(text)
             section.metadata[LLM_RAW_RESPONSE] = raw_result
             if parsed_result:
-                results.append(parsed_result)
+                for k, v in parsed_result.items():
+                    # lowercase as automaton matching is lower case too
+                    results[k.lower().strip()] = v
             elif self.drop_failed_sections:
                 logger.info(f"Failed to parse result: {raw_result}, dropping section")
                 doc.sections.remove(section)
             else:
                 raise ValueError(f"Failed to parse result: {raw_result}")
-        # reverse so that conflicts are resolved in the order they were found
-        results.reverse()
         automaton = self._build_automaton(results)
         for section in doc.sections:
             for ent in self._automaton_matching(automaton, self.namespace(), section):
                 section.entities.append(ent)
 
-    def _build_automaton(self, parsed_results: list[dict[str, str]]) -> ahocorasick.Automaton:
+    def _build_automaton(self, all_section_results: dict[str, str]) -> ahocorasick.Automaton:
         automaton = ahocorasick.Automaton()
-        for parsed_result in parsed_results:
-            for ent_match, ent_class in parsed_result.items():
-                automaton.add_word(
-                    ent_match.strip().lower(), (ent_match.strip(), ent_class.strip())
-                )
+        for ent_match, ent_class in all_section_results.items():
+            automaton.add_word(ent_match, (ent_match, ent_class))
         automaton.make_automaton()
         return automaton
 
