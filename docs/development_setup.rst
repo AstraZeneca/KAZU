@@ -40,3 +40,17 @@ To run all the checks manually you can run:
     $ pre-commit run --all-files
 
 This will run all the checks on all the files in the repository.
+
+
+Updating the Changelog
+-----------------------
+We use `towncrier <https://towncrier.readthedocs.io/en/latest/>`_ to automatically update the changelog. This requires a new file to be generated
+and committed as part of the pr. To do this you can run for example:
+
+.. code-block:: console
+
+    $ towncrier create --content 'Fix bug with Chromosome X being converted to Chromosome 10 raised in #42' chromosomeX.bugfix.rst
+
+This will create a new file `docs/_changelog.d/chromosomeX.bugfix.rst` with the content `Fix bug with Chromosome X being converted to Chromosome 10 raised in #42`.
+You can create as many files as you want. Once you make a release and the PR is merged towncrier will automatically update the changelog with bullet points for each file
+and it will delete these files from the `_changelog.d` directory so the directory is always empty.
