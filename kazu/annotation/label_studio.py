@@ -61,7 +61,7 @@ class KazuToLabelStudioConverter:
                 # The extend here results in a list with a set of annotations for every original doc,
                 # which is what we want to signal to label studio 'this task has been annotated differently
                 # by several different annotation processes
-                result["annotations"].extend(chain(t["annotations"] for t in other_tasks))
+                result["annotations"].extend(chain(t["annotations"][0] for t in other_tasks))
                 yield result
 
     @classmethod
@@ -101,7 +101,7 @@ class KazuToLabelStudioConverter:
                     Adding this warning as a safeguard"""
                 )
             for span in ent.spans:
-                region_id_str = f"{ent_hash}_{span}"
+                region_id_str = f"{ent_hash}_{ent.namespace}_{span}"
                 match = text[span.start : span.end]
                 ner_region = KazuToLabelStudioConverter._create_ner_region(
                     ent, region_id_str, span, match
