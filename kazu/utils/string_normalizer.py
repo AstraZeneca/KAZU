@@ -1,11 +1,11 @@
 import re
-from os import getenv
-
-import regex
 from functools import lru_cache
+from os import getenv
 from typing import Optional, Protocol
 
-from kazu.language.language_phenomena import GREEK_SUBS, DASHES
+import regex
+
+from kazu.language.language_phenomena import DASHES, GREEK_SUBS
 
 
 class EntityClassNormalizer(Protocol):
@@ -69,7 +69,6 @@ class DefaultStringNormalizer(EntityClassNormalizer):
         re.compile(r"(?<!\()‐(?!\))"): " ",  # hyphen not in brackets
         re.compile(r"\sI\s|\sI$"): " 1 ",
         re.compile(r"\sV\s|\sV$"): " 5 ",
-        re.compile(r"\sX\s|\sX$"): " 10 ",
     }
     re_subs_2 = {
         re.compile(r"\sA\s|\sA$|^A\s"): " ALPHA ",
