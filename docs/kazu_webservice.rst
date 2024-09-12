@@ -20,7 +20,7 @@ Install the library with the `webserver` option:
     pip install 'kazu[webserver]'
 
     # Get the version of Kazu in a dynamic manner
-    # Alternatively, you can set the version string manually, 
+    # Alternatively, you can set the version string manually,
     # for example: export VERSION=2.1.1
     export VERSION=$(python -c "from importlib.metadata import version; print(version('kazu'))")
 
@@ -78,7 +78,7 @@ You can find an example from here: http://kazu.korea.ac.kr/
 
 
 Swagger UI (by FastAPI)
--------
+----------------------------
 
 You can see the FastAPI documentation (Swagger UI) at :
 
@@ -94,4 +94,3 @@ We tested this tutorial with:
 
 1. Python 3.9.6, Kazu 2.1.1, on a CPU-only Linux server.
 2. Python 3.11, Kazu 2.1.1+, on a CPU-only macOS (Intel MacBook).
-
