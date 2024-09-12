@@ -146,6 +146,31 @@ def initial_lowercase_then_upper_to_case_sensitive(
         return resource
 
 
+def multiword(
+    resource: OntologyStringResource,
+) -> OntologyStringResource:
+    """If any synonym has more than one words, it's likely a noun phase and we should
+    mark all synonyms PROBABLE.
+
+    :param resource:
+    :return:
+    """
+    if any(" " in syn.text for syn in resource.original_synonyms):
+        return dataclasses.replace(
+            resource,
+            original_synonyms=frozenset(
+                dataclasses.replace(syn, mention_confidence=MentionConfidence.PROBABLE)
+                for syn in resource.original_synonyms
+            ),
+            alternative_synonyms=frozenset(
+                dataclasses.replace(syn, mention_confidence=MentionConfidence.PROBABLE)
+                for syn in resource.alternative_synonyms
+            ),
+        )
+    else:
+        return resource
+
+
 class LikelyAcronym(AutoCurationAction):
     """If all synonyms are less than or equal to the specified length, and are all upper
     case, give a confidence of POSSIBLE to all forms."""

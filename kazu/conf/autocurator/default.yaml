@@ -6,6 +6,8 @@ basic:
     - _target_: kazu.ontology_preprocessing.autocuration.LikelyAcronym
     - _target_: kazu.ontology_preprocessing.autocuration.IsCommmonWord
       path: ${oc.env:KAZU_MODEL_PACK}/misc/20k_most_common.txt
+    - _target_: hydra.utils.get_method
+      path: kazu.ontology_preprocessing.autocuration.multiword
     - _target_: kazu.ontology_preprocessing.autocuration.MinLength
       min_len: 2
     - _target_: kazu.ontology_preprocessing.autocuration.MaxLength
