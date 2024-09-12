@@ -6,12 +6,6 @@ The Kazu framework can be run in REST API mode with a few additional steps. This
 Installation
 ------------
 
-First, clone the repository:
-
-.. code-block:: bash
-
-    git clone https://github.com/AstraZeneca/KAZU.git
-    cd KAZU
 
 Install the library with the `webserver` option:
 
