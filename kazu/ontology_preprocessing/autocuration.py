@@ -31,8 +31,7 @@ class SymbolicToCaseSensitiveAction(AutoCurationAction):
                     for syn in resource.alternative_synonyms
                 ),
             )
-        else:
-            return resource
+        return resource
 
 
 class IsCommmonWord(AutoCurationAction):
@@ -58,8 +57,7 @@ class IsCommmonWord(AutoCurationAction):
                     for syn in resource.alternative_synonyms
                 ),
             )
-        else:
-            return resource
+        return resource
 
 
 class MinLength(AutoCurationAction):
@@ -85,8 +83,7 @@ class MaxLength(AutoCurationAction):
     def __call__(self, resource: OntologyStringResource) -> OntologyStringResource:
         if any(len(syn.text) > self.max_len for syn in resource.original_synonyms):
             return dataclasses.replace(resource, behaviour=OntologyStringBehaviour.DROP_FOR_LINKING)
-        else:
-            return resource
+        return resource
 
 
 def is_upper_case_word_to_case_insensitive(
@@ -113,8 +110,7 @@ def is_upper_case_word_to_case_insensitive(
                 for syn in resource.alternative_synonyms
             ),
         )
-    else:
-        return resource
+    return resource
 
 
 def initial_lowercase_then_upper_to_case_sensitive(
@@ -142,8 +138,7 @@ def initial_lowercase_then_upper_to_case_sensitive(
                 for syn in resource.alternative_synonyms
             ),
         )
-    else:
-        return resource
+    return resource
 
 
 def multiword(
@@ -167,8 +162,7 @@ def multiword(
                 for syn in resource.alternative_synonyms
             ),
         )
-    else:
-        return resource
+    return resource
 
 
 class LikelyAcronym(AutoCurationAction):
@@ -195,8 +189,7 @@ class LikelyAcronym(AutoCurationAction):
                     for syn in resource.alternative_synonyms
                 ),
             )
-        else:
-            return resource
+        return resource
 
 
 class AutoCurator:
