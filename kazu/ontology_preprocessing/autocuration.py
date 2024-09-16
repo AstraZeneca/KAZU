@@ -11,7 +11,7 @@ class AutoCurationAction(Protocol):
 
 
 class SymbolicToCaseSensitiveAction(AutoCurationAction):
-    def __init__(self, entity_class: str):
+    def __init__(self, entity_class: str) -> None:
         self.entity_class = entity_class
 
     def __call__(self, resource: OntologyStringResource) -> OntologyStringResource:
@@ -36,7 +36,7 @@ class SymbolicToCaseSensitiveAction(AutoCurationAction):
 
 
 class IsCommmonWord(AutoCurationAction):
-    def __init__(self, path: str):
+    def __init__(self, path: str) -> None:
         with open(path, mode="r") as inf:
             self.common_words = {line.rstrip() for line in inf.readlines()}
 
@@ -63,7 +63,7 @@ class IsCommmonWord(AutoCurationAction):
 
 
 class MinLength(AutoCurationAction):
-    def __init__(self, min_len: int = 2):
+    def __init__(self, min_len: int = 2) -> None:
         self.min_len = min_len
 
     def __call__(self, resource: OntologyStringResource) -> OntologyStringResource:
@@ -79,7 +79,7 @@ class MinLength(AutoCurationAction):
 class MaxLength(AutoCurationAction):
     """Drop resources that exceed a maximum string length."""
 
-    def __init__(self, max_len: int = 60):
+    def __init__(self, max_len: int = 60) -> None:
         self.max_len = max_len
 
     def __call__(self, resource: OntologyStringResource) -> OntologyStringResource:
@@ -175,7 +175,7 @@ class LikelyAcronym(AutoCurationAction):
     """If all synonyms are less than or equal to the specified length, and are all upper
     case, give a confidence of POSSIBLE to all forms."""
 
-    def __init__(self, max_len_to_consider: int = 5):
+    def __init__(self, max_len_to_consider: int = 5) -> None:
         self.max_len_to_consider = max_len_to_consider
 
     def __call__(self, resource: OntologyStringResource) -> OntologyStringResource:
@@ -200,7 +200,7 @@ class LikelyAcronym(AutoCurationAction):
 
 
 class AutoCurator:
-    def __init__(self, actions: list[AutoCurationAction]):
+    def __init__(self, actions: list[AutoCurationAction]) -> None:
         self.actions = actions
 
     def __call__(self, resources: set[OntologyStringResource]) -> Iterable[OntologyStringResource]:
