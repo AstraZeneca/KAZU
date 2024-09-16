@@ -150,7 +150,7 @@ def multiword(
     :param resource:
     :return:
     """
-    if any(" " in syn.text for syn in resource.original_synonyms):
+    if any(" " in syn.text.strip() for syn in resource.original_synonyms):
         return dataclasses.replace(
             resource,
             original_synonyms=frozenset(
