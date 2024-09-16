@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 class HFDataset(IterableDataset[dict[str, Any]]):
     def __getitem__(self, index: int) -> dict[str, Any]:
-        return {key: self.encodings.data["input_ids"][index] for key in self.keys_to_use}
+        return {key: self.encodings.data[key][index] for key in self.keys_to_use}
 
     def __init__(self, encodings: BatchEncoding, keys_to_use: Iterable[str]):
         """Simple implementation of :class:`torch.utils.data.IterableDataset`\\ ,
@@ -44,7 +44,7 @@ class HFDataset(IterableDataset[dict[str, Any]]):
     def __iter__(self) -> Iterator[dict[str, Any]]:
 
         for i in range(self.dataset_size):
-            yield {key: self.encodings.data["input_ids"][i] for key in self.keys_to_use}
+            yield {key: self.encodings.data[key][i] for key in self.keys_to_use}
 
 
 class TransformersModelForTokenClassificationNerStep(Step):
