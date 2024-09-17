@@ -8,6 +8,15 @@ from kazu.data import Document, Entity, Section, MentionConfidence
 from kazu.steps import Step, document_iterating_step
 from kazu.utils.spacy_pipeline import BASIC_PIPELINE_NAME, SpacyPipelines, basic_spacy_pipeline
 from kazu.utils.utils import word_is_valid
+from openai.lib.azure import AzureOpenAI
+
+import vertexai
+from vertexai.generative_models._generative_models import (
+    GenerativeModel,
+    SafetySetting,
+    SafetySettingsType,
+)
+
 
 logger = logging.getLogger(__name__)
 
@@ -76,8 +85,6 @@ class AzureOpenAILLMModel(LLMModel):
         self.temp = temp
         self.sys_prompt = sys_prompt
         self.model = model
-        from openai.lib.azure import AzureOpenAI
-
         self.llm = AzureOpenAI(
             api_version=api_version,
             azure_deployment=deployment,
@@ -109,6 +116,7 @@ class VertexLLMModel(LLMModel):
         model: str,
         generation_config: dict[str, Any],
         location: str,
+        safety_settings: Optional[SafetySettingsType] = None,
     ):
         """Initialize the VertexLLMModel.
 
@@ -117,21 +125,30 @@ class VertexLLMModel(LLMModel):
         :param model: The model to use.
         :param generation_config: The generation config to use.
         :param location: The location to use.
+        :param safety_settings: The safety settings to use. Optional.
         """
 
         self.prompt = prompt
-        import vertexai  # type: ignore[import-untyped]
-        from vertexai.generative_models import GenerativeModel  # type: ignore[import-untyped]
-
         vertexai.init(project=project, location=location)
         self.model = GenerativeModel(model)
         self.generation_config = generation_config
+        self.set_safety_settings(safety_settings)
+
+    def set_safety_settings(self, safety_settings: Optional[SafetySettingsType] = None) -> None:
+        if safety_settings is not None:
+            self.safety_settings = safety_settings
+        else:  # by default turn off safety blocking
+            self.safety_settings = {
+                category: SafetySetting.HarmBlockThreshold.BLOCK_NONE
+                for category in SafetySetting.HarmCategory
+            }
 
     def call_llm(self, text: str) -> str:
         response = self.model.generate_content(
             self.prompt + text,
             generation_config=self.generation_config,
             stream=False,
+            safety_settings=self.safety_settings,
         )
         if isinstance(response.text, str):
             return response.text
