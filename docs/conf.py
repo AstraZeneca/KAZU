@@ -261,4 +261,6 @@ nitpick_ignore = [
     ("py:class", "gliner.GLiNER"),
     # no sphinx for streamlit
     ("py:class", "streamlit.delta_generator.DeltaGenerator"),
+    # vertexai
+    ("py:class", "vertexai.*"),
 ]
