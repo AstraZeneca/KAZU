@@ -4,17 +4,15 @@ dynamic = ["version"]
 description = "Biomedical Named Entity Recognition and Entity Linking for Enterprise use cases"
 readme = "README.md"
 requires-python = ">=3.9"
-authors = [
-  {name = "AstraZeneca AI and Korea University"}
-]
+authors = [{ name = "AstraZeneca AI and Korea University" }]
 classifiers = [
-    "Programming Language :: Python :: 3 :: Only",
-    "License :: OSI Approved :: Apache Software License",
-    "Typing :: Typed",
-    "Operating System :: OS Independent",
-    "Intended Audience :: Healthcare Industry",
-    "Natural Language :: English",
-    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+  "Programming Language :: Python :: 3 :: Only",
+  "License :: OSI Approved :: Apache Software License",
+  "Typing :: Typed",
+  "Operating System :: OS Independent",
+  "Intended Audience :: Healthcare Industry",
+  "Natural Language :: English",
+  "Topic :: Scientific/Engineering :: Medical Science Apps.",
 ]
 dependencies = [
   "spacy>=3.2.2",
@@ -42,7 +40,7 @@ dependencies = [
   "cachetools>=5.2.0",
   "diskcache>=5.4.0",
   "cattrs>=23.2.0",
-  "tqdm"
+  "tqdm",
 ]
 
 [project.urls]
@@ -63,7 +61,11 @@ webserver = [
   "pydantic<2.0",
   "ray[serve]>=2.0.0",
   "PyJWT>=2.0.0",
-  ]
+]
+llm = [
+  "google-cloud-aiplatform", # Required for vertex API
+  "openai",                  # Required for OpenAI API
+]
 typed = [
   # version 2.31.0.3 introduced
   # overly strict typing of requests.HttpError
@@ -74,7 +76,7 @@ typed = [
   "types-psutil",
   "types-docutils",
   "pandas-stubs>=2.0.0",
-  "types-tqdm"
+  "types-tqdm",
 ]
 model-training = [
   "pytorch-metric-learning>=0.9.99",
@@ -90,12 +92,10 @@ all-steps = [
   "py4j>=0.10.9",
   "rdkit>=2023.3.1",
   "stanza>=1.0.0,<1.6.0", # We're seeing IT test failures on linux with stanza 1.6.0
-  "gliner==0.1.7", # GLINER is under active development, so pinning version until API stabilises
-  "google-cloud-aiplatform", # Required for vertex API
-  "openai" # Required for OpenAI API
+  "gliner==0.1.7",        # GLINER is under active development, so pinning version until API stabilises
 ]
 dev = [
-  "kazu[webserver,typed,model-training,all-steps,model-training]",
+  "kazu[webserver,typed,model-training,all-steps,model-training,llm]",
   "black~=22.0",
   "blacken-docs",
   "flake8",
@@ -108,7 +108,7 @@ dev = [
   "pytest-cov",
   "pytest-timeout",
   "hypothesis",
-  "sphinx>=7.2,<8.0", # 8.0.0 breaks our docs at the moment
+  "sphinx>=7.2,<8.0",                                                  # 8.0.0 breaks our docs at the moment
   "myst_parser",
   "furo>=2023.08.17",
   # to allow profiling
@@ -121,7 +121,7 @@ dev = [
   # required for parsing wikimedia data for disambiguation
   'mwparserfromhell',
   # required for krt
-  'streamlit'
+  'streamlit',
 ]
 
 [build-system]
@@ -166,10 +166,7 @@ in-place = true
 
 [tool.pytest.ini_options]
 testpaths = "kazu/tests"
-filterwarnings = [
-  "ignore::DeprecationWarning",
-  "ignore::SyntaxWarning",
-]
+filterwarnings = ["ignore::DeprecationWarning", "ignore::SyntaxWarning"]
 
 [tool.mypy]
 strict = true
@@ -185,27 +182,25 @@ no_implicit_reexport = false
 
 [[tool.mypy.overrides]]
 module = [
-    "seqeval.*",
-    "transformers.*",
-    "tokenizers.*",
-    "stanza.*",
-    "sklearn.*",
-    "pytorch_metric_learning.*",
-    "srsly.*",
-    "py4j.*",
-    "diskcache.*",
-    "rdkit.*",
-    "ahocorasick.*",
-    "scipy.*",
-    "mwparserfromhell.*",
-    "gliner.*"
+  "seqeval.*",
+  "transformers.*",
+  "tokenizers.*",
+  "stanza.*",
+  "sklearn.*",
+  "pytorch_metric_learning.*",
+  "srsly.*",
+  "py4j.*",
+  "diskcache.*",
+  "rdkit.*",
+  "ahocorasick.*",
+  "scipy.*",
+  "mwparserfromhell.*",
+  "gliner.*",
 ]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = [
-  "kazu.tests.*"
-]
+module = ["kazu.tests.*"]
 # in particular, return types for pytest test
 # functions are always None, we don't want to have to annotate that
 disallow_incomplete_defs = false
@@ -216,31 +211,31 @@ disallow_untyped_defs = false
 # the numbers can be re-calculated with:
 # mypy kazu docs conftest.py | cut -f 1,2 -d ':' | sed '$d' | sort | uniq | cut -f 1 -d ':' | uniq -c | sort --reverse | awk '{file_without_dot_py = substr($2, 0, length($2)-3); gsub("/", ".", file_without_dot_py); print "  \""file_without_dot_py"\",  # "$1}'
 module = [
-  "kazu.data",  # 13
-  "kazu.distillation.models",  # 10
-  "conftest",  # 10
-  "kazu.ontology_matching.ontology_matcher",  # 6
-  "kazu.utils.build_and_test_model_packs",  # 5
-  "kazu.linking.sapbert.train",  # 4
-  "kazu.annotation.acceptance_test",  # 4
-  "kazu.utils.utils",  # 3
-  "kazu.ontology_preprocessing.parsers",  # 3
-  "kazu.web.server",  # 2
-  "kazu.utils.spacy_pipeline",  # 2
-  "kazu.ontology_preprocessing.synonym_generation",  # 2
-  "kazu.distillation.tiny_transformers",  # 2
-  "kazu.database.in_memory_db",  # 2
-  "kazu.annotation.label_studio",  # 2
-  "kazu.web.req_id_header",  # 1
-  "kazu.utils.abbreviation_detector",  # 1
-  "kazu.steps.other.cleanup",  # 1
-  "kazu.steps.ner.tokenized_word_processor",  # 1
-  "kazu.steps.linking.post_processing.strategy_runner",  # 1
-  "kazu.steps.linking.post_processing.disambiguation.context_scoring",  # 1
-  "kazu.ontology_preprocessing.base",  # 1
-  "kazu.distillation.metrics",  # 1
+  "kazu.data",                                                         # 13
+  "kazu.distillation.models",                                          # 10
+  "conftest",                                                          # 10
+  "kazu.ontology_matching.ontology_matcher",                           # 6
+  "kazu.utils.build_and_test_model_packs",                             # 5
+  "kazu.linking.sapbert.train",                                        # 4
+  "kazu.annotation.acceptance_test",                                   # 4
+  "kazu.utils.utils",                                                  # 3
+  "kazu.ontology_preprocessing.parsers",                               # 3
+  "kazu.web.server",                                                   # 2
+  "kazu.utils.spacy_pipeline",                                         # 2
+  "kazu.ontology_preprocessing.synonym_generation",                    # 2
+  "kazu.distillation.tiny_transformers",                               # 2
+  "kazu.database.in_memory_db",                                        # 2
+  "kazu.annotation.label_studio",                                      # 2
+  "kazu.web.req_id_header",                                            # 1
+  "kazu.utils.abbreviation_detector",                                  # 1
+  "kazu.steps.other.cleanup",                                          # 1
+  "kazu.steps.ner.tokenized_word_processor",                           # 1
+  "kazu.steps.linking.post_processing.strategy_runner",                # 1
+  "kazu.steps.linking.post_processing.disambiguation.context_scoring", # 1
+  "kazu.ontology_preprocessing.base",                                  # 1
+  "kazu.distillation.metrics",                                         # 1
   # this is docs/conf.py
-  "conf",  # 1
+  "conf", # 1
 ]
 # we had a bunch of these in the codebase before we moved to a 'strict' mypy config, and it was too many
 # to fix at that time for the payoff. Having overrides for the modules that would error rather than
@@ -253,26 +248,26 @@ disallow_untyped_defs = false
 [[tool.mypy.overrides]]
 # as above - number is errors for that file
 module = [
-  "kazu.data",  # 13
-  "kazu.annotation.label_studio",  # 9
-  "kazu.distillation.models",  # 8
-  "kazu.linking.sapbert.train",  # 6
-  "kazu.steps.linking.post_processing.xref_manager",  # 3
+  "kazu.data",                                                         # 13
+  "kazu.annotation.label_studio",                                      # 9
+  "kazu.distillation.models",                                          # 8
+  "kazu.linking.sapbert.train",                                        # 6
+  "kazu.steps.linking.post_processing.xref_manager",                   # 3
   "kazu.steps.linking.post_processing.mapping_strategies.strategies",  # 3
-  "kazu.web.server",  # 2
-  "kazu.web.jwtauth",  # 2
-  "kazu.utils.link_index",  # 2
-  "kazu.utils.build_and_test_model_packs",  # 2
-  "kazu.steps.ner.hf_token_classification",  # 2
-  "kazu.steps.linking.post_processing.disambiguation.strategies",  # 2
-  "kazu.ontology_preprocessing.parsers",  # 2
-  "kazu.annotation.acceptance_test",  # 2
-  "kazu.utils.string_normalizer",  # 1
-  "kazu.steps.linking.post_processing.disambiguation.context_scoring",  # 1
-  "kazu.steps.linking.entity_class_disambiguation",  # 1
-  "kazu.pipeline",  # 1
-  "kazu.ontology_preprocessing.base",  # 1
-  "kazu.ontology_matching.ontology_matcher",  # 1
+  "kazu.web.server",                                                   # 2
+  "kazu.web.jwtauth",                                                  # 2
+  "kazu.utils.link_index",                                             # 2
+  "kazu.utils.build_and_test_model_packs",                             # 2
+  "kazu.steps.ner.hf_token_classification",                            # 2
+  "kazu.steps.linking.post_processing.disambiguation.strategies",      # 2
+  "kazu.ontology_preprocessing.parsers",                               # 2
+  "kazu.annotation.acceptance_test",                                   # 2
+  "kazu.utils.string_normalizer",                                      # 1
+  "kazu.steps.linking.post_processing.disambiguation.context_scoring", # 1
+  "kazu.steps.linking.entity_class_disambiguation",                    # 1
+  "kazu.pipeline",                                                     # 1
+  "kazu.ontology_preprocessing.base",                                  # 1
+  "kazu.ontology_matching.ontology_matcher",                           # 1
 ]
 # as above, we want this to be true for files it can be, especially new files.
 disallow_any_generics = false
@@ -284,7 +279,7 @@ package-dir = "kazu"
 filename = "CHANGELOG.md"
 title_format = "## {version} - {project_date}"
 underlines = ["", "", ""]
-start_string= "<!-- towncrier release notes start -->\n"
+start_string = "<!-- towncrier release notes start -->\n"
 
 [tool.vulture]
 exclude = ["kazu/tests/*"]
@@ -301,13 +296,13 @@ check-protected = true
 ignore-no-params = true
 check-property-returns = true
 disable = [
-    "E113",  # function is missing a docstring
-    "E114",  # class is missing a docstring
-    # docsig considers it a syntax error if there's no actual description
-    # of the parameter. This is the main syntax error this catches, so turning
-    # it off doesn't do much harm
-    "E115",  # syntax error in description
-    # this isn't a problem, it just means there's a blank 'returns' section
-    # of the documentation. We could go back and clean this up.
-    "E104",  # return statement documented for None
+  "E113", # function is missing a docstring
+  "E114", # class is missing a docstring
+  # docsig considers it a syntax error if there's no actual description
+  # of the parameter. This is the main syntax error this catches, so turning
+  # it off doesn't do much harm
+  "E115", # syntax error in description
+  # this isn't a problem, it just means there's a blank 'returns' section
+  # of the documentation. We could go back and clean this up.
+  "E104", # return statement documented for None
 ]
