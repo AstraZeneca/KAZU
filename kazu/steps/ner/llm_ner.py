@@ -72,7 +72,9 @@ class LLMModel(ABC):
 class AzureOpenAILLMModel(LLMModel):
     """A class to interact with the Azure OpenAI API for LLMs."""
 
-    def __init__(self, model: str, deployment: str, api_version: str, sys_prompt: str, temp: float):
+    def __init__(
+        self, model: str, deployment: str, api_version: str, sys_prompt: str, temp: float
+    ) -> None:
         """Initialize the AzureOpenAILLMModel.
 
         :param model: The model to use.
@@ -117,7 +119,7 @@ class VertexLLMModel(LLMModel):
         generation_config: dict[str, Any],
         location: str,
         safety_settings: Optional[SafetySettingsType] = None,
-    ):
+    ) -> None:
         """Initialize the VertexLLMModel.
 
         :param project: The project to use.
