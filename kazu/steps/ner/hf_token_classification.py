@@ -287,7 +287,7 @@ class TransformersModelForTokenClassificationNerStep(Step):
         return section_frame_indices
 
     def get_multilabel_activations(self, loader: DataLoader) -> Tensor:
-        """Get a tensor consisting of confidences for labels in a single label
+        """Get a tensor consisting of confidences for labels in a multi label
         classification context.
 
         :param loader:
@@ -300,7 +300,7 @@ class TransformersModelForTokenClassificationNerStep(Step):
         return results.heaviside(torch.tensor([0.0]).to(self.device)).int().to("cpu")
 
     def get_single_label_activations(self, loader: DataLoader) -> Tensor:
-        """Get a tensor consisting of one hot binary classifications in a multi-label
+        """Get a tensor consisting of one hot binary classifications in a single label
         classification context.
 
         :param loader:
