@@ -65,7 +65,7 @@ class TransformersModelForTokenClassificationNerStep(Step):
         tokenized_word_processor: TokenizedWordProcessor,
         keys_to_use: Iterable[str],
         entity_splitter: Optional[NonContiguousEntitySplitter] = None,
-        device: Optional[str] = None,
+        device: str = "cpu",
     ):
         """
 
@@ -80,7 +80,7 @@ class TransformersModelForTokenClassificationNerStep(Step):
         """
 
         self.keys_to_use = set(keys_to_use)
-        self.device = device if device else "cpu"
+        self.device = device
         self.entity_splitter = entity_splitter
         if max_sequence_length % 2 != 0:
             raise RuntimeError(
