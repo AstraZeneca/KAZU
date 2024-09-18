@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- towncrier release notes start -->
 
+## 2.2.0 - 2024-09-18
+
+### Features
+
+- New LLMNERStep, for performing NER with LLMs
+
+### Bugfixes
+
+- Fix bug with Chromosome X being converted to Chromosome 10 raised in #42 (chromosomeX)
+- Fix pip install command in docs raised in #56 (docs_pip_command)
+- Added new multiword AutoCurationAction, and adjusted some curations as per #58.
+
+
 ## 2.1.1 - 2024-07-08
 
 
