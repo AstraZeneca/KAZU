@@ -43,7 +43,7 @@ class TokWordSpan:
 
 
 class SpanFinder(ABC):
-    def __init__(self, text: str, id2label: dict[int, str]):
+    def __init__(self, text: str, id2label: dict[int, str]) -> None:
         """
 
         :param text: the raw text to be processed
@@ -163,8 +163,7 @@ class SimpleSpanFinder(SpanFinder):
         classes_set = set(x[1] for x in bio_and_class_labels)
         if None in classes_set or self.text[word.word_char_start - 1] in self.span_breaking_chars:
             return False
-        else:
-            return True
+        return True
 
     def get_bio_and_class_labels(self, word: TokenizedWord) -> set[tuple[str, Optional[str]]]:
         """Return a set of tuple[<BIO label>,Optional[<class label>]] for a
@@ -294,8 +293,7 @@ class MultilabelSpanFinder(SpanFinder):
         """
         if not class_labels or self.text[word.word_char_start - 1] in self.span_breaking_chars:
             return False
-        else:
-            return True
+        return True
 
     def process_next_word(self, word: TokenizedWord) -> None:
         """Process the next word in the sequence, updating span information accordingly.
@@ -362,8 +360,7 @@ class TokenizedWordProcessor:
     def make_span_finder(self, text: str) -> SpanFinder:
         if self.use_multilabel:
             return self._make_multilabel_span_finder(text)
-        else:
-            return self._make_simple_span_finder(text)
+        return self._make_simple_span_finder(text)
 
     def __call__(self, words: list[TokenizedWord], text: str, namespace: str) -> list[Entity]:
         span_finder: SpanFinder = self.make_span_finder(text)
