@@ -212,13 +212,11 @@ disallow_untyped_defs = false
 # the numbers can be re-calculated with:
 # mypy kazu docs conftest.py | cut -f 1,2 -d ':' | sed '$d' | sort | uniq | cut -f 1 -d ':' | uniq -c | sort --reverse | awk '{file_without_dot_py = substr($2, 0, length($2)-3); gsub("/", ".", file_without_dot_py); print "  \""file_without_dot_py"\",  # "$1}'
 module = [
-  "kazu.distillation.models",              # 10
-  "kazu.utils.build_and_test_model_packs", # 5
-  "kazu.linking.sapbert.train",            # 4
-  "kazu.annotation.acceptance_test",       # 4
-  "kazu.utils.spacy_pipeline",             # 2
-  "kazu.distillation.tiny_transformers",   # 2
-  "kazu.distillation.metrics",             # 1
+  "kazu.distillation.models",            # 10
+  "kazu.linking.sapbert.train",          # 4
+  "kazu.utils.spacy_pipeline",           # 2
+  "kazu.distillation.tiny_transformers", # 2
+  "kazu.distillation.metrics",           # 1
 ]
 # we had a bunch of these in the codebase before we moved to a 'strict' mypy config, and it was too many
 # to fix at that time for the payoff. Having overrides for the modules that would error rather than

@@ -9,6 +9,7 @@ from collections.abc import Iterable
 
 import hydra
 from hydra.utils import instantiate
+from omegaconf.dictconfig import DictConfig
 
 from kazu.data import Entity, Document, IdsAndSource
 from kazu.pipeline import Pipeline
@@ -30,7 +31,7 @@ def acceptance_criteria() -> AcceptanceCriteria:
 
 
 @hydra.main(version_base=HYDRA_VERSION_BASE, config_path=".", config_name="config")
-def execute_full_pipeline_acceptance_test(cfg):
+def execute_full_pipeline_acceptance_test(cfg: DictConfig) -> None:
     manager = instantiate(cfg.LabelStudioManager)
     pipeline: Pipeline = instantiate(cfg.Pipeline)
     analyse_full_pipeline(pipeline, manager.export_from_ls(), acceptance_criteria())
@@ -75,9 +76,9 @@ class SectionScorer:
                 )
         return dict(mappings_by_source)
 
-    def calculate_ner_matches(self):
+    def calculate_ner_matches(self) -> None:
         combos = itertools.product(self.gold_ents, self.test_ents)
-        for (gold_ent, test_ent) in combos:
+        for gold_ent, test_ent in combos:
             if (
                 gold_ent.spans == test_ent.spans or gold_ent.is_partially_overlapped(test_ent)
             ) and gold_ent.entity_class == test_ent.entity_class:
@@ -85,7 +86,7 @@ class SectionScorer:
                 self.ner_fp_soft.discard(test_ent)
                 self.ner_fn_soft.discard(gold_ent)
 
-    def calculate_linking_matches(self):
+    def calculate_linking_matches(self) -> None:
         for gold_ent, test_ents in self.gold_to_test_ent_soft.items():
             gold_mappings_by_source = self.group_mappings_by_source([gold_ent])
             test_mappings_by_source = self.group_mappings_by_source(test_ents)
@@ -305,7 +306,7 @@ def analyse_annotation_consistency(docs: list[Document]) -> None:
 
 
 @hydra.main(version_base=HYDRA_VERSION_BASE, config_path="../../", config_name="conf")
-def check_annotation_consistency(cfg):
+def check_annotation_consistency(cfg: DictConfig) -> None:
 
     manager = instantiate(cfg.LabelStudioManager)
     docs = manager.export_from_ls()

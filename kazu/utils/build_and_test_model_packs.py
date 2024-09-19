@@ -47,7 +47,7 @@ class BuildConfiguration:
     #: pack is built. If any exceptions are detected, the build will fail.
     sanity_test_strings: list[str] = field(default_factory=list)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if len(self.resources) > 0:
             self.requires_resources = True
         else:
@@ -73,7 +73,7 @@ class ModelPackBuilder:
         maybe_base_configuration_path: Optional[Path],
         skip_tests: bool,
         zip_pack: bool,
-    ):
+    ) -> None:
         """A ModelPackBuilder is a helper class to assist in the building of a model
         pack.
 
@@ -107,7 +107,7 @@ class ModelPackBuilder:
         os.environ["KAZU_MODEL_PACK"] = str(self.model_pack_build_path)
         self.build_config = self.load_build_configuration()
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """For nice log messages."""
         return f"ModelPackBuilder({self.target_model_pack_path.name})"
 
@@ -202,7 +202,7 @@ class ModelPackBuilder:
             data = json.load(f)
         return BuildConfiguration(**data)
 
-    def apply_merge_configurations(self):
+    def apply_merge_configurations(self) -> None:
 
         # copy the target pack to the target build dir
         shutil.copytree(
@@ -231,7 +231,7 @@ class ModelPackBuilder:
         if self.build_config.requires_resources:
             self.copy_resources_to_target()
 
-    def copy_resources_to_target(self):
+    def copy_resources_to_target(self) -> None:
 
         for parent_dir_str, resource_list in self.build_config.resources.items():
             parent_dir_path = Path(parent_dir_str)
@@ -302,7 +302,7 @@ class ModelPackBuilder:
                 )
         return pipeline
 
-    def report_tested_dependencies(self):
+    def report_tested_dependencies(self) -> None:
         dependencies = subprocess.check_output("pip freeze --exclude-editable", shell=True).decode(
             "utf-8"
         )
