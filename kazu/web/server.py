@@ -382,7 +382,7 @@ class KazuWebAPI:
     @app.get("/")
     @app.get(f"/{API}")
     @app.get(f"/{API}/")
-    def get(self):
+    def get(self) -> str:
         logger.info("received request to root /")
         return "Welcome to KAZU."
 
@@ -631,7 +631,7 @@ def start(cfg: DictConfig) -> None:
     serve.run(KazuWebAPI.bind(cfg))
 
 
-def stop():
+def stop() -> None:
     if ray.is_initialized():
         serve.shutdown()
         ray.shutdown()

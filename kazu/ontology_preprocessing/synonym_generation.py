@@ -111,7 +111,7 @@ class CombinatorialSynonymGenerator:
 # TODO: this isn't used currently - do we want to try and refine it
 # or just kill it off altogether?
 class SeparatorExpansion(SynonymGenerator):
-    def __init__(self):
+    def __init__(self) -> None:
         self.all_stopwords = basic_spacy_pipeline().Defaults.stop_words
         self.end_expression_brackets = r"(.*)\((.*)\)$"
         self.mid_expression_brackets = r"(.*)\(.*\)(.*)"
@@ -234,7 +234,7 @@ class StringReplacement(SynonymGenerator):
 
         return results
 
-    def _generate_greek_subs(self, results, synonym_str):
+    def _generate_greek_subs(self, results: set[str], synonym_str: str) -> None:
         # only strip text once initially - the greek character replacement
         # will not introduce leading or trailing whitespace unlike the other
         # replacements above
