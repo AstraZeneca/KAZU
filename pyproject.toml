@@ -218,7 +218,6 @@ module = [
   "kazu.linking.sapbert.train",              # 4
   "kazu.annotation.acceptance_test",         # 4
   "kazu.utils.utils",                        # 3
-  "kazu.ontology_preprocessing.parsers",     # 3
   "kazu.utils.spacy_pipeline",               # 2
   "kazu.distillation.tiny_transformers",     # 2
   "kazu.annotation.label_studio",            # 2
