@@ -140,7 +140,7 @@ class SimpleSpanFinder(SpanFinder):
                 span = TokWordSpan(clazz=clazz, tok_words=[word])
                 self.active_spans.append(span)
 
-    def close_spans(self):
+    def close_spans(self) -> None:
         """Close any active spans."""
         for active_span in self.active_spans:
             if len(active_span.tok_words) > 0:

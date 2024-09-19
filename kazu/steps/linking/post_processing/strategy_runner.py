@@ -149,7 +149,7 @@ class ConfidenceLevelStrategyExecution:
                         self.entity_mapped[entity_key] = True
                         yield mapping
 
-    def reset(self):
+    def reset(self) -> None:
         """Clear state, ready for another execution.
 
         Should be called when the underlying :class:`.Document` has
