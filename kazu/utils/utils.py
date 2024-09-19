@@ -150,7 +150,9 @@ def _create_ngrams_iter(tokens: Sequence[str], n: int) -> Iterable[Sequence[str]
     pass
 
 
-def _create_ngrams_iter(tokens, n=2):
+def _create_ngrams_iter(
+    tokens: Union[str, Sequence[str]], n: int = 2
+) -> Union[Iterable[str], Iterable[Sequence[str]]]:
     """Yields ngrams of the input as a sequence of strings.
 
     Tokens can be a single string where each token is a character, or an Iterable of
@@ -182,13 +184,13 @@ def create_word_ngrams(s: str, n: int = 2) -> list[str]:
 class Singleton(type):
     _instances: dict[type, Any] = {}
 
-    def __call__(cls, *args, **kwargs):
+    def __call__(cls, *args: Any, **kwargs: Any) -> Any:
         if cls not in cls._instances:
             cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
         return cls._instances[cls]
 
     @staticmethod
-    def clear_all():
+    def clear_all() -> None:
         logger.warning(
             "When clearing singletons, check that instances of classes with metaclass=Singleton are "
             "not used as class fields, as this will cause unexpected behaviour. Also note that any existing "
