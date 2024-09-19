@@ -11,6 +11,7 @@ Others are aimed to provide flexibly for a user across a format, such as
 If you do not find a parser that meets your needs, please see
 :ref:`writing-a-custom-parser`.
 """
+
 import copy
 import itertools
 import json
@@ -27,6 +28,8 @@ from urllib import parse
 
 import pandas as pd
 import rdflib
+import rdflib.paths
+import rdflib.term
 import packaging.version
 
 from kazu.database.in_memory_db import MetadataDatabase
@@ -71,7 +74,7 @@ class JsonLinesOntologyParser(OntologyParser):
                 for line in f:
                     yield json.loads(line)
 
-    def parse_to_dataframe(self):
+    def parse_to_dataframe(self) -> pd.DataFrame:
         return pd.DataFrame.from_records(self.json_dict_to_parser_records(self.read(self.in_path)))
 
     def json_dict_to_parser_records(
@@ -555,11 +558,12 @@ class RDFGraphParser(OntologyParser):
         pass
 
     @staticmethod
-    def convert_to_rdflib_ref(pred):
+    def convert_to_rdflib_ref(
+        pred: Union[str, rdflib.paths.Path, rdflib.term.Node]
+    ) -> Union[rdflib.URIRef, rdflib.paths.Path, rdflib.term.Node]:
         if isinstance(pred, (rdflib.term.Node, rdflib.paths.Path)):
             return pred
-        else:
-            return rdflib.URIRef(pred)
+        return rdflib.URIRef(pred)
 
     @staticmethod
     def parse_to_graph(in_path: Path) -> rdflib.Graph:
@@ -768,7 +772,7 @@ class GeneOntologyParser(RDFGraphParser):
         df = df.drop(df.index[df[DEFAULT_LABEL].str.contains("obsolete")])
         return df
 
-    def __del__(self):
+    def __del__(self) -> None:
         GeneOntologyParser.instances.discard(self.name)
 
 
