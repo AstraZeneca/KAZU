@@ -27,7 +27,7 @@ class MetadataDatabase(metaclass=Singleton):
     and this singleton allows us to load it once/reduce memory usage
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._database: dict[ParserName, dict[Idx, Metadata]] = {}
         self._keys_lst: dict[ParserName, list[Idx]] = {}
         self.parser_name_to_ent_class: dict[str, str] = {}
@@ -77,7 +77,7 @@ class MetadataDatabase(metaclass=Singleton):
 class SynonymDatabase(metaclass=Singleton):
     """Singleton of a database of synonyms."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._syns_database_by_syn: dict[
             ParserName, dict[NormalisedSynonymStr, LinkingCandidate]
         ] = {}

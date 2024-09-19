@@ -48,6 +48,7 @@ import logging
 from starlette.middleware.base import BaseHTTPMiddleware, RequestResponseEndpoint
 from starlette.requests import Request
 from starlette.responses import Response
+from starlette.types import ASGIApp
 
 from kazu.web.server import get_request_id
 
@@ -62,7 +63,7 @@ class AddRequestIdMiddleware(BaseHTTPMiddleware):
     to the request as part of authentication.
     """
 
-    def __init__(self, app):
+    def __init__(self, app: ASGIApp) -> None:
         super().__init__(app)
 
     async def dispatch(self, request: Request, call_next: RequestResponseEndpoint) -> Response:
