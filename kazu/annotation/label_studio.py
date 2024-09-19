@@ -147,14 +147,16 @@ class KazuToLabelStudioConverter:
                 "start": span.start,
                 "end": span.end,
                 "text": match,
-                "taxonomy": sorted(
-                    set(
-                        (mapping.source, f"{mapping.default_label}|{mapping.idx}")
-                        for mapping in ent.mappings
+                "taxonomy": (
+                    sorted(
+                        set(
+                            (mapping.source, f"{mapping.default_label}|{mapping.idx}")
+                            for mapping in ent.mappings
+                        )
                     )
-                )
-                if len(ent.mappings) > 0
-                else [("None", "unmapped|unmapped")],
+                    if len(ent.mappings) > 0
+                    else [("None", "unmapped|unmapped")]
+                ),
             },
         }
 
@@ -286,7 +288,7 @@ class LSToKazuConversion:
                     mappings=mappings,
                 )
 
-    def _create_contiguous_entity(self, label, region_id, span):
+    def _create_contiguous_entity(self, label: str, region_id: str, span: CharSpan) -> Entity:
         single_span = frozenset([span])
         mappings = deepcopy(self.id_to_mappings.get(region_id, set()))
         return Entity(
@@ -514,7 +516,7 @@ class LabelStudioManager:
                     f"more than one project with name: {self.project_name} found in Label Studio"
                 )
 
-    def delete_project_if_exists(self):
+    def delete_project_if_exists(self) -> None:
         try:
             resp = requests.delete(
                 f"{self.url}/api/projects/{self.project_id}",
@@ -553,7 +555,7 @@ class LabelStudioManager:
     def update_view(self, view: LabelStudioAnnotationView, docs: list[set[Document]]) -> None:
         pass
 
-    def update_view(self, view, docs):
+    def update_view(self, view, docs):  # type: ignore[no-untyped-def]
         """Update the view of a label studio project.
 
         :param view:
@@ -590,7 +592,7 @@ class LabelStudioManager:
     def update_tasks(self, docs: list[set[Document]]) -> None:
         pass
 
-    def update_tasks(self, docs):
+    def update_tasks(self, docs):  # type: ignore[no-untyped-def]
         """Add tasks to a label studio project.
 
         :param docs: either a list of kazu documents, or a list of a set of kazu

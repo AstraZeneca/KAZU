@@ -216,10 +216,8 @@ module = [
   "kazu.utils.build_and_test_model_packs", # 5
   "kazu.linking.sapbert.train",            # 4
   "kazu.annotation.acceptance_test",       # 4
-  "kazu.utils.utils",                      # 3
   "kazu.utils.spacy_pipeline",             # 2
   "kazu.distillation.tiny_transformers",   # 2
-  "kazu.annotation.label_studio",          # 2
   "kazu.distillation.metrics",             # 1
 ]
 # we had a bunch of these in the codebase before we moved to a 'strict' mypy config, and it was too many
