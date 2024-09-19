@@ -256,7 +256,7 @@ class KazuAbbreviationDetector:
         self.load_matcher()
         self.spacy_pipelines.add_reload_callback_func(BASIC_PIPELINE_NAME, self.load_matcher)
 
-    def load_matcher(self):
+    def load_matcher(self) -> None:
         self.matcher = Matcher(self.spacy_pipelines.get_model(BASIC_PIPELINE_NAME).vocab)
         self.matcher.add("parenthesis", [[{"ORTH": "("}, {"OP": "+"}, {"ORTH": ")"}]])
 
@@ -395,7 +395,7 @@ class KazuAbbreviationDetector:
         already_seen_long: set[str] = set()
         already_seen_short: set[str] = set()
         long_form_string_to_source_ents: dict[str, set[Entity]] = {}
-        for (section, long_candidate, short_candidate) in section_and_long_to_short_candidates:
+        for section, long_candidate, short_candidate in section_and_long_to_short_candidates:
             short, long = find_abbreviation(long_candidate, short_candidate)
             # We need the long and short form definitions to be unique, because we need
             # to store them so we can look them up later. This is a bit of a

@@ -1,6 +1,7 @@
 import dataclasses
 import logging
 import urllib
+import urllib.parse
 from collections.abc import Iterable, Callable
 from typing import Protocol, Optional
 
@@ -93,7 +94,7 @@ class DropUnmappedEntityFilter:
 
 
 class LinkingCandidateRemovalCleanupAction:
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
     def cleanup(self, doc: Document) -> None:
@@ -122,7 +123,7 @@ class StripMappingURIsAction:
         self.parsers_to_strip = parsers_to_strip
 
     @staticmethod
-    def _strip_uri(idx):
+    def _strip_uri(idx: str) -> str:
         url = urllib.parse.urlparse(idx)
         if url.scheme == "":
             # not a url

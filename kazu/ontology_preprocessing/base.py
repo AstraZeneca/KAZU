@@ -312,7 +312,7 @@ class OntologyParser(ABC):
                     EquivalentIdAggregationStrategy.RESOLVED_BY_SIMILARITY,
                 )
 
-    def _parse_df_if_not_already_parsed(self):
+    def _parse_df_if_not_already_parsed(self) -> None:
         if self.parsed_dataframe is None:
             self.parsed_dataframe = self.parse_to_dataframe()
             self.parsed_dataframe[DATA_ORIGIN] = self.data_origin

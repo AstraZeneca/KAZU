@@ -54,7 +54,7 @@ class TfIdfScorer(metaclass=Singleton):
     the need to load them into memory multiple times.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.synonym_db = SynonymDatabase()
         self.parser_to_vectorizer: dict[str, TfidfVectorizer] = self.build_vectorizers()
 
