@@ -145,7 +145,7 @@ class OntologyMatcher:
         self.cfg.labels = list(labels)
         self.set_context_matchers()
 
-    def set_context_matchers(self):
+    def set_context_matchers(self) -> None:
         self.tp_matchers, self.fp_matchers = self._create_token_matchers()
         self.tp_coocc_dict, self.fp_coocc_dict = self._create_coocc_dicts()
 
@@ -414,7 +414,7 @@ class OntologyMatcher:
         matcher.add("Anatomy_context", patterns)
         return matcher
 
-    def _create_coocc_dicts(self):
+    def _create_coocc_dicts(self) -> tuple[_CoocDict, _CoocDict]:
         tp_coocc_dict: _CoocDict = {}
         fp_coocc_dict: _CoocDict = {}
         if GENE in self.labels:
@@ -425,13 +425,13 @@ class OntologyMatcher:
 
     _ivf_fertility_treatment_cooccurrence = ["ICSI", "cycle", "treatment"]
 
-    def _create_gene_fp_dict(self):
+    def _create_gene_fp_dict(self) -> dict[str, list[str]]:
         """Define cooccurrence links that determine likely FP gene hits."""
         gene_dict = {}
         gene_dict["IVF"] = self._ivf_fertility_treatment_cooccurrence
         return gene_dict
 
-    def _create_disease_fp_dict(self):
+    def _create_disease_fp_dict(self) -> dict[str, list[str]]:
         """Define cooccurrence links that determine likely FP disease hits."""
         disease_dict = {}
         disease_dict["MFS"] = ["endpoint"]
@@ -447,7 +447,7 @@ class OntologyMatcher:
         :param exclude: String names of serialization fields to exclude.
         """
 
-        def pickle_matcher(p, strict):
+        def pickle_matcher(p: Path, strict: bool) -> None:
             with p.open("wb") as outfile:
                 if strict:
                     pickle.dump(self.strict_matcher, outfile)
@@ -468,7 +468,7 @@ class OntologyMatcher:
         Modifies the object in place and returns it.
         """
 
-        def unpickle_matcher(p, strict):
+        def unpickle_matcher(p: Path, strict: bool) -> None:
             with p.open("rb") as infile:
                 matcher = pickle.load(infile)
                 if strict:
