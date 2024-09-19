@@ -128,10 +128,10 @@ class CharSpan:
         """
         return (other.start <= self.start <= other.end) or (other.start <= self.end <= other.end)
 
-    def __lt__(self, other):
+    def __lt__(self, other: "CharSpan") -> bool:
         return self.start < other.start
 
-    def __gt__(self, other):
+    def __gt__(self, other: "CharSpan") -> bool:
         return self.end > other.end
 
 
@@ -319,7 +319,7 @@ class Entity:
             raise ValueError("spans are not valid")
         return int(earliest_start), latest_end
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         self.start, self.end = self.calc_starts_and_ends()
         self.match_norm = StringNormalizer.normalize(self.match, self.entity_class)
 
@@ -480,7 +480,7 @@ class Section:
         else:
             raise AttributeError("Immutable sentence_spans is already set")
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"name: {self.name}, text: {self.text[:100]}"
 
     @staticmethod
@@ -501,7 +501,7 @@ class Document:
     #: | |metadata_s11n_warn|
     metadata: dict = field(default_factory=dict, hash=False)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"idx: {self.idx}"
 
     def get_entities(self) -> list[Entity]:
@@ -553,7 +553,7 @@ class Document:
         sections = [Section(text=text, name=name) for name, text in named_sections.items()]
         return cls(sections=sections)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return sum(len(section.text) for section in self.sections)
 
     @staticmethod
@@ -713,7 +713,7 @@ class ParserAction:
     def from_dict(cls, json_dict: dict) -> "ParserAction":
         return kazu_json_converter.structure(json_dict, ParserAction)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if len(self.parser_to_target_id_mappings) == 0:
             raise ValueError(
                 f"parser_to_target_id_mappings must be specified for global actions: {self}"
@@ -732,7 +732,7 @@ class GlobalParserActions:
         default_factory=lambda: defaultdict(list), init=False
     )
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         for action in self.actions:
             for parser_name in action.parser_to_target_id_mappings.keys():
                 self._parser_name_to_action[parser_name].append(action)
@@ -855,7 +855,7 @@ class OntologyStringResource:
     #: human readable comments about this curation decision
     comment: Optional[str] = field(default=None, compare=False)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         cs_syns = defaultdict(set)
         ci_syns = defaultdict(set)
         if len(self.original_synonyms) == 0:
