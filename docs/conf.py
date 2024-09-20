@@ -13,7 +13,7 @@
 import inspect
 import os
 import sys
-from typing import Any
+from typing import Any, Union
 
 import kazu
 
@@ -144,7 +144,7 @@ intersphinx_mapping = {
 
 # this function is modified from the corresponding one in pandas, which in turn is modified from numpy
 # both licenses are included in the docs folder, as PANDAS_LICENSE.txt and NUMPY_LICENSE.txt
-def linkcode_resolve(domain, info):
+def linkcode_resolve(domain: str, info: dict[str, Any]) -> Union[str, None]:
     """Determine the URL corresponding to Python object."""
     if domain != "py":
         return None

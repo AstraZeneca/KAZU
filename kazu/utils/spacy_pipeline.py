@@ -100,7 +100,7 @@ class SpacyPipelines(metaclass=Singleton):
         a long time).
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.reload_at = int(os.getenv("KAZU_SPACY_RELOAD_INTERVAL", 1000))
         """The interval (number of calls) at which spaCy models are reloaded.
 
