@@ -201,7 +201,7 @@ module = [
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = ["kazu.tests.*"]
+module = ["kazu.tests.*", "conftest"]
 # in particular, return types for pytest test
 # functions are always None, we don't want to have to annotate that
 disallow_incomplete_defs = false
