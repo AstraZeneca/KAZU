@@ -414,9 +414,9 @@ class OntologyStringConflictAnalyser:
                             )
                             for syn in alt_syns_by_syn_norm.get(syn_norm, set())
                         ),
-                        associated_id_sets=frozenset(assoc_id_sets)
-                        if len(assoc_id_sets) > 0
-                        else None,
+                        associated_id_sets=(
+                            frozenset(assoc_id_sets) if len(assoc_id_sets) > 0 else None
+                        ),
                     )
                 )
         return cleaned_resources
@@ -535,9 +535,11 @@ class OntologyStringConflictAnalyser:
                     behaviour=next(iter(behaviours)),
                     original_synonyms=frozenset(original_synonyms_merged),
                     alternative_synonyms=frozenset(generated_synonyms_merged),
-                    associated_id_sets=next(iter(associated_id_sets_this_syn_norm))
-                    if len(associated_id_sets_this_syn_norm) == 1
-                    else None,
+                    associated_id_sets=(
+                        next(iter(associated_id_sets_this_syn_norm))
+                        if len(associated_id_sets_this_syn_norm) == 1
+                        else None
+                    ),
                     comment="\n".join(comments) if len(comments) > 0 else None,
                 )
                 merged_resources.add(merged_resource)
@@ -989,7 +991,7 @@ class OntologyResourceProcessor:
 
     def _process_global_actions(self) -> None:
         if self.global_actions is None:
-            return None
+            return
 
         override_resources_by_id = defaultdict(set)
         for resource in self.resources:
@@ -999,65 +1001,55 @@ class OntologyResourceProcessor:
                         override_resources_by_id[idx].add(resource)
 
         for action in self.global_actions.parser_behaviour(self.parser_name):
-            if action.behaviour is ParserBehaviour.DROP_IDS_FROM_PARSER:
-                ids = action.parser_to_target_id_mappings[self.parser_name]
-                for idx in ids:
-                    counter_this_idx = self._drop_id_from_all_linking_candidates(idx)
-                    if (
-                        counter_this_idx[LinkingCandidateModificationResult.ID_SET_MODIFIED]
-                        + counter_this_idx[
-                            LinkingCandidateModificationResult.LINKING_CANDIDATE_DROPPED
-                        ]
-                        == 0
-                    ):
-                        logger.warning("failed to drop %s from %s", idx, self.parser_name)
-                    else:
-                        logger.debug(
-                            "dropped ID %s from %s. LinkingCandidate modified count: %s, LinkingCandidate dropped count: %s",
-                            idx,
-                            self.parser_name,
-                            counter_this_idx[LinkingCandidateModificationResult.ID_SET_MODIFIED],
-                            counter_this_idx[
-                                LinkingCandidateModificationResult.LINKING_CANDIDATE_DROPPED
-                            ],
-                        )
-
-                        for override_resource_to_modify in set(
-                            override_resources_by_id.get(idx, set())
-                        ):
-                            assert override_resource_to_modify.associated_id_sets is not None
-                            new_associated_id_sets = self._drop_id_from_associated_id_sets(
-                                idx, override_resource_to_modify.associated_id_sets
-                            )
-                            if len(new_associated_id_sets) == 0:
-
-                                self.resources.remove(override_resource_to_modify)
-                                override_resources_by_id[idx].remove(override_resource_to_modify)
-                                logger.debug(
-                                    "removed resource %s because of global action",
-                                    override_resource_to_modify,
-                                )
-                            elif (
-                                new_associated_id_sets
-                                != override_resource_to_modify.associated_id_sets
-                            ):
-                                self.resources.remove(override_resource_to_modify)
-                                override_resources_by_id[idx].remove(override_resource_to_modify)
-                                mod_resource = dataclasses.replace(
-                                    override_resource_to_modify,
-                                    associated_id_sets=new_associated_id_sets,
-                                )
-                                self.resources.add(mod_resource)
-                                override_resources_by_id[idx].add(mod_resource)
-                                logger.debug(
-                                    "modified resource %s to %s because of global action",
-                                    override_resource_to_modify,
-                                    mod_resource,
-                                )
-
-            else:
+            if action.behaviour is not ParserBehaviour.DROP_IDS_FROM_PARSER:
                 raise ValueError(f"unknown behaviour for parser {self.parser_name}, {action}")
-        return None
+
+            ids = action.parser_to_target_id_mappings[self.parser_name]
+            for idx in ids:
+                counter_this_idx = self._drop_id_from_all_linking_candidates(idx)
+                if (
+                    counter_this_idx[LinkingCandidateModificationResult.ID_SET_MODIFIED]
+                    + counter_this_idx[LinkingCandidateModificationResult.LINKING_CANDIDATE_DROPPED]
+                    == 0
+                ):
+                    logger.warning("failed to drop %s from %s", idx, self.parser_name)
+                    continue
+
+                logger.debug(
+                    "dropped ID %s from %s. LinkingCandidate modified count: %s, LinkingCandidate dropped count: %s",
+                    idx,
+                    self.parser_name,
+                    counter_this_idx[LinkingCandidateModificationResult.ID_SET_MODIFIED],
+                    counter_this_idx[LinkingCandidateModificationResult.LINKING_CANDIDATE_DROPPED],
+                )
+
+                for override_resource_to_modify in set(override_resources_by_id.get(idx, set())):
+                    assert override_resource_to_modify.associated_id_sets is not None
+                    new_associated_id_sets = self._drop_id_from_associated_id_sets(
+                        idx, override_resource_to_modify.associated_id_sets
+                    )
+                    if len(new_associated_id_sets) == 0:
+
+                        self.resources.remove(override_resource_to_modify)
+                        override_resources_by_id[idx].remove(override_resource_to_modify)
+                        logger.debug(
+                            "removed resource %s because of global action",
+                            override_resource_to_modify,
+                        )
+                    elif new_associated_id_sets != override_resource_to_modify.associated_id_sets:
+                        self.resources.remove(override_resource_to_modify)
+                        override_resources_by_id[idx].remove(override_resource_to_modify)
+                        mod_resource = dataclasses.replace(
+                            override_resource_to_modify,
+                            associated_id_sets=new_associated_id_sets,
+                        )
+                        self.resources.add(mod_resource)
+                        override_resources_by_id[idx].add(mod_resource)
+                        logger.debug(
+                            "modified resource %s to %s because of global action",
+                            override_resource_to_modify,
+                            mod_resource,
+                        )
 
     def _attempt_to_add_database_entry_for_resource(
         self,
