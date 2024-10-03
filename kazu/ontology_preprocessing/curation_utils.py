@@ -798,8 +798,7 @@ class OntologyResourceProcessor:
                 for idx in equiv_ids.ids:
                     self._candidates_by_id[idx].add(candidate)
             return LinkingCandidateModificationResult.LINKING_CANDIDATE_ADDED
-        else:
-            return LinkingCandidateModificationResult.NO_ACTION
+        return LinkingCandidateModificationResult.NO_ACTION
 
     def _drop_linking_candidate(self, synonym: NormalisedSynonymStr) -> None:
         """Remove a linking candidate from the database, so that it cannot be used as a
@@ -883,10 +882,9 @@ class OntologyResourceProcessor:
             == 0
         ):
             return LinkingCandidateModificationResult.NO_ACTION
-        else:
-            return self._modify_or_drop_linking_candidate_after_id_set_change(
-                new_associated_id_sets=new_assoc_id_frozenset, candidate=candidate_to_modify
-            )
+        return self._modify_or_drop_linking_candidate_after_id_set_change(
+            new_associated_id_sets=new_assoc_id_frozenset, candidate=candidate_to_modify
+        )
 
     def _drop_id_from_associated_id_sets(
         self, id_to_drop: Idx, associated_id_sets: AssociatedIdSets
@@ -986,8 +984,7 @@ class OntologyResourceProcessor:
             raise ValueError(f"unknown behaviour for parser {self.parser_name}, {resource}")
         if result is LinkingCandidateModificationResult.LINKING_CANDIDATE_DROPPED:
             return None
-        else:
-            return resource
+        return resource
 
     def _process_global_actions(self) -> None:
         if self.global_actions is None:
@@ -1135,12 +1132,12 @@ class OntologyResourceProcessor:
                     log_formatting_dict,
                 )
                 return LinkingCandidateModificationResult.NO_ACTION
-            else:
-                logger.debug(
-                    log_prefix
-                    + " . Will remove existing syn_norm <%(syn_norm)s> as an ID set override has been specified",
-                    log_formatting_dict,
-                )
+
+            logger.debug(
+                log_prefix
+                + " . Will remove existing syn_norm <%(syn_norm)s> as an ID set override has been specified",
+                log_formatting_dict,
+            )
 
         # no candidate exists, or we want to override so one will be made
         assert resource_associated_id_set is not None
@@ -1169,5 +1166,4 @@ class OntologyResourceProcessor:
                 aggregated_by=EquivalentIdAggregationStrategy.MODIFIED_BY_CURATION,
             )
             return self._update_candidate_lookups(new_candidate, True)
-        else:
-            return LinkingCandidateModificationResult.NO_ACTION
+        return LinkingCandidateModificationResult.NO_ACTION
