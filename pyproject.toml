@@ -227,13 +227,11 @@ module = [
   "kazu.utils.build_and_test_model_packs",                             # 2
   "kazu.steps.ner.hf_token_classification",                            # 2
   "kazu.steps.linking.post_processing.disambiguation.strategies",      # 2
-  "kazu.ontology_preprocessing.parsers",                               # 2
   "kazu.annotation.acceptance_test",                                   # 2
   "kazu.utils.string_normalizer",                                      # 1
   "kazu.steps.linking.post_processing.disambiguation.context_scoring", # 1
   "kazu.steps.linking.entity_class_disambiguation",                    # 1
   "kazu.pipeline",                                                     # 1
-  "kazu.ontology_preprocessing.base",                                  # 1
   "kazu.ontology_matching.ontology_matcher",                           # 1
 ]
 # as above, we want this to be true for files it can be, especially new files.

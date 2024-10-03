@@ -480,7 +480,7 @@ class RDFGraphParser(OntologyParser):
         in_path: PathLike,
         entity_class: str,
         name: str,
-        uri_regex: Union[str, re.Pattern],
+        uri_regex: Union[str, re.Pattern[str]],
         synonym_predicates: Iterable[RdfRef],
         string_scorer: Optional[StringSimilarityScorer] = None,
         synonym_merge_threshold: float = 0.7,
@@ -493,7 +493,7 @@ class RDFGraphParser(OntologyParser):
         global_actions: Optional[GlobalParserActions] = None,
         ontology_downloader: Optional[OntologyDownloader] = None,
         label_predicate: RdfRef = rdflib.RDFS.label,
-    ):
+    ) -> None:
         super().__init__(
             in_path=in_path,
             entity_class=entity_class,
@@ -641,7 +641,7 @@ class SKOSXLGraphParser(RDFGraphParser):
         in_path: PathLike,
         entity_class: str,
         name: str,
-        uri_regex: Union[str, re.Pattern],
+        uri_regex: Union[str, re.Pattern[str]],
         synonym_predicates: Iterable[RdfRef] = (SKOS_XL_ALT_LABEL_PATH,),
         string_scorer: Optional[StringSimilarityScorer] = None,
         synonym_merge_threshold: float = 0.7,
@@ -654,7 +654,7 @@ class SKOSXLGraphParser(RDFGraphParser):
         global_actions: Optional[GlobalParserActions] = None,
         ontology_downloader: Optional[OntologyDownloader] = None,
         label_predicate: RdfRef = SKOS_XL_PREF_LABEL_PATH,
-    ):
+    ) -> None:
         super().__init__(
             in_path=in_path,
             entity_class=entity_class,
@@ -710,7 +710,7 @@ class GeneOntologyParser(RDFGraphParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         ontology_downloader: Optional[OntologyDownloader] = None,
-    ):
+    ) -> None:
         super().__init__(
             in_path=in_path,
             entity_class=entity_class,
@@ -793,7 +793,7 @@ class BiologicalProcessGeneOntologyParser(GeneOntologyParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         ontology_downloader: Optional[OntologyDownloader] = None,
-    ):
+    ) -> None:
         super().__init__(
             in_path=in_path,
             entity_class=entity_class,
@@ -833,7 +833,7 @@ class MolecularFunctionGeneOntologyParser(GeneOntologyParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         ontology_downloader: Optional[OntologyDownloader] = None,
-    ):
+    ) -> None:
         super().__init__(
             in_path=in_path,
             entity_class=entity_class,
@@ -873,7 +873,7 @@ class CellularComponentGeneOntologyParser(GeneOntologyParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         ontology_downloader: Optional[OntologyDownloader] = None,
-    ):
+    ) -> None:
         super().__init__(
             in_path=in_path,
             entity_class=entity_class,
@@ -913,7 +913,7 @@ class UberonOntologyParser(RDFGraphParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         ontology_downloader: Optional[OntologyDownloader] = None,
-    ):
+    ) -> None:
 
         super().__init__(
             in_path=in_path,
@@ -1013,7 +1013,7 @@ class HGNCGeneOntologyParser(OntologyParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         ontology_downloader: Optional[OntologyDownloader] = None,
-    ):
+    ) -> None:
         super().__init__(
             in_path=in_path,
             entity_class=entity_class,
@@ -1160,7 +1160,7 @@ class CLOOntologyParser(RDFGraphParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         ontology_downloader: Optional[OntologyDownloader] = None,
-    ):
+    ) -> None:
         super().__init__(
             in_path=in_path,
             entity_class=entity_class,
@@ -1296,7 +1296,7 @@ class MeddraOntologyParser(OntologyParser):
             "Social circumstances",
             "Investigations",
         ),
-    ):
+    ) -> None:
         super().__init__(
             in_path=in_path,
             entity_class=entity_class,
@@ -1448,7 +1448,7 @@ class CLOntologyParser(RDFGraphParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         ontology_downloader: Optional[OntologyDownloader] = None,
-    ):
+    ) -> None:
 
         super().__init__(
             in_path=in_path,
@@ -1547,7 +1547,7 @@ class TabularOntologyParser(OntologyParser):
         global_actions: Optional[GlobalParserActions] = None,
         ontology_downloader: Optional[OntologyDownloader] = None,
         **kwargs: Any,
-    ):
+    ) -> None:
         """
 
         :param in_path:
@@ -1612,7 +1612,7 @@ class ATCDrugClassificationParser(TabularOntologyParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         ontology_downloader: Optional[OntologyDownloader] = None,
-    ):
+    ) -> None:
         super().__init__(
             in_path=in_path,
             entity_class=entity_class,
@@ -1682,7 +1682,7 @@ class StatoParser(RDFGraphParser):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         ontology_downloader: Optional[OntologyDownloader] = None,
-    ):
+    ) -> None:
 
         super().__init__(
             in_path=in_path,
