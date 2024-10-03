@@ -100,7 +100,7 @@ class OntologyParser(ABC):
         curations_path: Optional[PathLike] = None,
         global_actions: Optional[GlobalParserActions] = None,
         ontology_downloader: Optional[OntologyDownloader] = None,
-    ):
+    ) -> None:
         """
 
         :param in_path: Path to some resource that should be processed (e.g. owl file, db config, tsv etc)
