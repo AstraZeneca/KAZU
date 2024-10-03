@@ -88,7 +88,7 @@ all-steps = [
 ]
 dev = [
   "kazu[webserver,typed,all-steps,llm]",
-  "black~=22.0",
+  "black~=24.0",
   "blacken-docs",
   "flake8",
   "mypy",

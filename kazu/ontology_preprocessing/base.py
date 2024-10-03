@@ -605,9 +605,11 @@ class OntologyParser(ABC):
         return linking_candidates
 
     @kazu_disk_cache.memoize(ignore={0})
-    def _populate_databases(
-        self, parser_name: str
-    ) -> tuple[Optional[list[OntologyStringResource]], OntologyMetadata, set[LinkingCandidate],]:
+    def _populate_databases(self, parser_name: str) -> tuple[
+        Optional[list[OntologyStringResource]],
+        OntologyMetadata,
+        set[LinkingCandidate],
+    ]:
         """Disk cacheable method that populates all databases.
 
         :param parser_name: name of this parser. Required for correct operation of cache
