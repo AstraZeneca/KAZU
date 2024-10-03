@@ -164,7 +164,7 @@ class OntologyParser(ABC):
             StringNormalizer.normalize, entity_class=self.entity_class
         )
 
-        for i, row in (
+        for _, row in (
             candidates_df[["syn_norm", SYN, IDX, MAPPING_TYPE]]
             .groupby(["syn_norm"])
             .agg(set)
@@ -253,64 +253,60 @@ class OntologyParser(ABC):
                 ),
                 EquivalentIdAggregationStrategy.NO_STRATEGY,
             )
-        else:
 
-            if len(ids_and_source) == 1:
-                return (
-                    frozenset((EquivalentIdSet(ids_and_source=frozenset(ids_and_source)),)),
-                    EquivalentIdAggregationStrategy.UNAMBIGUOUS,
+        if len(ids_and_source) == 1:
+            return (
+                frozenset((EquivalentIdSet(ids_and_source=frozenset(ids_and_source)),)),
+                EquivalentIdAggregationStrategy.UNAMBIGUOUS,
+            )
+
+        if not is_symbolic:
+            return (
+                frozenset((EquivalentIdSet(ids_and_source=frozenset(ids_and_source)),)),
+                EquivalentIdAggregationStrategy.MERGED_AS_NON_SYMBOLIC,
+            )
+
+        # use similarity to group ids into EquivalentIdSets
+        DefaultLabels = set[str]
+        id_list: list[tuple[IdsAndSource, DefaultLabels]] = []
+        for id_and_source_tuple in ids_and_source:
+            default_label = cast(
+                str,
+                self.metadata_db.get_by_idx(self.name, id_and_source_tuple[0])[DEFAULT_LABEL],
+            )
+            most_similar_id_set = None
+            best_score = 0.0
+            for id_and_default_label_set in id_list:
+                sim = max(
+                    self.string_scorer(default_label, other_label)
+                    for other_label in id_and_default_label_set[1]
                 )
+                if sim > self.synonym_merge_threshold and sim > best_score:
+                    most_similar_id_set = id_and_default_label_set
+                    best_score = sim
 
-            if not is_symbolic:
-                return (
-                    frozenset((EquivalentIdSet(ids_and_source=frozenset(ids_and_source)),)),
-                    EquivalentIdAggregationStrategy.MERGED_AS_NON_SYMBOLIC,
+            # for the first label, the above for loop is a no-op as id_sets is empty
+            # and the below if statement will be true.
+            # After that, it will be True if the id under consideration should not
+            # merge with any existing group and should get its own EquivalentIdSet
+            if not most_similar_id_set:
+                id_list.append(
+                    (
+                        {id_and_source_tuple},
+                        {default_label},
+                    )
                 )
             else:
-                # use similarity to group ids into EquivalentIdSets
+                most_similar_id_set[0].add(id_and_source_tuple)
+                most_similar_id_set[1].add(default_label)
 
-                DefaultLabels = set[str]
-                id_list: list[tuple[IdsAndSource, DefaultLabels]] = []
-                for id_and_source_tuple in ids_and_source:
-                    default_label = cast(
-                        str,
-                        self.metadata_db.get_by_idx(self.name, id_and_source_tuple[0])[
-                            DEFAULT_LABEL
-                        ],
-                    )
-                    most_similar_id_set = None
-                    best_score = 0.0
-                    for id_and_default_label_set in id_list:
-                        sim = max(
-                            self.string_scorer(default_label, other_label)
-                            for other_label in id_and_default_label_set[1]
-                        )
-                        if sim > self.synonym_merge_threshold and sim > best_score:
-                            most_similar_id_set = id_and_default_label_set
-                            best_score = sim
-
-                    # for the first label, the above for loop is a no-op as id_sets is empty
-                    # and the below if statement will be true.
-                    # After that, it will be True if the id under consideration should not
-                    # merge with any existing group and should get its own EquivalentIdSet
-                    if not most_similar_id_set:
-                        id_list.append(
-                            (
-                                {id_and_source_tuple},
-                                {default_label},
-                            )
-                        )
-                    else:
-                        most_similar_id_set[0].add(id_and_source_tuple)
-                        most_similar_id_set[1].add(default_label)
-
-                return (
-                    frozenset(
-                        EquivalentIdSet(ids_and_source=frozenset(ids_and_source))
-                        for ids_and_source, _ in id_list
-                    ),
-                    EquivalentIdAggregationStrategy.RESOLVED_BY_SIMILARITY,
-                )
+        return (
+            frozenset(
+                EquivalentIdSet(ids_and_source=frozenset(ids_and_source))
+                for ids_and_source, _ in id_list
+            ),
+            EquivalentIdAggregationStrategy.RESOLVED_BY_SIMILARITY,
+        )
 
     def _parse_df_if_not_already_parsed(self) -> None:
         if self.parsed_dataframe is None:
