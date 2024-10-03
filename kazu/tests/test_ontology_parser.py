@@ -44,7 +44,7 @@ ENTITY_CLASS = "action_test"
 pytestmark = pytest.mark.usefixtures("mock_kazu_disk_cache_on_parsers")
 
 
-def parser_data_with_target_synonym():
+def parser_data_with_target_synonym() -> dict[str, list[str]]:
     parser_data = deepcopy(DummyParser.DEFAULT_DUMMY_DATA)
     parser_data[IDX].append(TARGET_SYNONYM)
     parser_data[DEFAULT_LABEL].append(TARGET_SYNONYM)
@@ -53,7 +53,7 @@ def parser_data_with_target_synonym():
     return parser_data
 
 
-def parser_data_with_split_equiv_id_set():
+def parser_data_with_split_equiv_id_set() -> dict[str, list[str]]:
     parser_data = deepcopy(DummyParser.DEFAULT_DUMMY_DATA)
     parser_data[IDX].append(TARGET_SYNONYM)
     parser_data[DEFAULT_LABEL].append(TARGET_SYNONYM)
@@ -103,9 +103,9 @@ def setup_databases(
         data=parser_data,
         entity_class=ENTITY_CLASS,
         curations_path=str(curations_path) if curations_path is not None else None,
-        global_actions=load_global_actions(global_actions_path)
-        if global_actions_path is not None
-        else None,
+        global_actions=(
+            load_global_actions(global_actions_path) if global_actions_path is not None else None
+        ),
     )
     noop_curations_path_str: Optional[str]
     if noop_parser_curations_style == "empty":
@@ -132,7 +132,7 @@ def setup_databases(
     return SynonymDatabase()
 
 
-def test_should_add_resource_to_parser(tmp_path):
+def test_should_add_resource_to_parser(tmp_path) -> None:
     resource = OntologyStringResource(
         original_synonyms=frozenset(
             [
@@ -165,7 +165,7 @@ def test_should_add_resource_to_parser(tmp_path):
     assert len(syn_db.get_all(PARSER_1_NAME)) == len(syn_db.get_all(NOOP_PARSER_NAME)) + 1
 
 
-def test_should_drop_from_parser_via_general_rule(tmp_path):
+def test_should_drop_from_parser_via_general_rule(tmp_path) -> None:
     global_actions = GlobalParserActions(
         actions=[
             ParserAction(
@@ -187,7 +187,7 @@ def test_should_drop_from_parser_via_general_rule(tmp_path):
     assert len(syn_db.get_all(PARSER_1_NAME)) + 2 == len(syn_db.get_all(NOOP_PARSER_NAME))
 
 
-def test_should_modify_resource_from_parser_via_general_rule(tmp_path):
+def test_should_modify_resource_from_parser_via_general_rule(tmp_path) -> None:
     # note, this test is similar to test_should_drop_from_parser_via_general_rule,
     # although it tests that a OntologyStringResource is also affected by a general rule
     global_actions = GlobalParserActions(
@@ -249,7 +249,7 @@ def test_should_modify_resource_from_parser_via_general_rule(tmp_path):
     assert len(syn_db.get_syns_for_id(PARSER_1_NAME, "first")) == 0
 
 
-def test_should_not_add_a_resource_as_id_nonexistant(tmp_path):
+def test_should_not_add_a_resource_as_id_nonexistant(tmp_path) -> None:
     override_id = "I do not exist"
     resource = OntologyStringResource(
         original_synonyms=frozenset(
@@ -291,7 +291,7 @@ def test_should_not_add_a_resource_as_id_nonexistant(tmp_path):
     assert override_id not in modified_equivalent_ids
 
 
-def test_should_override_id_set(tmp_path):
+def test_should_override_id_set(tmp_path) -> None:
     resource = OntologyStringResource(
         original_synonyms=frozenset(
             [
@@ -332,7 +332,7 @@ def test_should_override_id_set(tmp_path):
     assert "second" in equiv_id_set.ids
 
 
-def test_should_not_add_a_resource_to_db_as_one_already_exists(tmp_path):
+def test_should_not_add_a_resource_to_db_as_one_already_exists(tmp_path) -> None:
     resource = OntologyStringResource(
         original_synonyms=frozenset(
             [
@@ -369,7 +369,7 @@ def test_should_not_add_a_resource_to_db_as_one_already_exists(tmp_path):
     assert len(syn_db.get_all(PARSER_1_NAME)) == len(syn_db.get_all(NOOP_PARSER_NAME))
 
 
-def test_should_not_add_a_resource_as_can_infer_associated_id_sets(tmp_path):
+def test_should_not_add_a_resource_as_can_infer_associated_id_sets(tmp_path) -> None:
     resource = OntologyStringResource(
         original_synonyms=frozenset(
             [
@@ -392,7 +392,7 @@ def test_should_not_add_a_resource_as_can_infer_associated_id_sets(tmp_path):
     assert len(syn_db.get_all(PARSER_1_NAME)) == len(syn_db.get_all(NOOP_PARSER_NAME))
 
 
-def test_conflicting_overrides_in_associated_id_sets(tmp_path):
+def test_conflicting_overrides_in_associated_id_sets(tmp_path) -> None:
     resource1 = OntologyStringResource(
         original_synonyms=frozenset(
             [
@@ -453,7 +453,7 @@ def test_conflicting_overrides_in_associated_id_sets(tmp_path):
         )
 
 
-def test_gene_ontology_caching(tmp_path):
+def test_gene_ontology_caching(tmp_path) -> None:
     micro_graph = """
 @prefix : <https://www.example.org> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
