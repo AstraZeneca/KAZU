@@ -21,6 +21,8 @@ jobs:
 
       - name: create venv and install dependencies
         run: |
+          sudo apt-get update
+          sudo apt install libopenblas-dev
           rm -r /tmp/kazu-env || true
 
           PIP_CACHE_DIR=$(pip cache dir)
