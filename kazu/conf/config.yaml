@@ -6,7 +6,7 @@ defaults:
       - ot_molecule
       - ot_bio_proc
       - ot_phenotype
-#      - ot_measurement # curations are currently low quality
+      #      - ot_measurement # curations are currently low quality
       - ot_medical_proc
       - cellosaurus
       - chembl
@@ -28,7 +28,6 @@ defaults:
   - DictionaryEntityLinkingStep: default
   - SapBertTraining: default
   - Pipeline: default
-  - DistillationTraining: default
   - OpsinStep: default
   - SethStep: default
   - SynonymGeneration: default
@@ -50,7 +49,7 @@ defaults:
   - global_actions: default
   - GLiNERStep: default
   - autocurator: default
-  - _self_  # see https://hydra.cc/docs/1.2/upgrades/1.0_to_1.1/default_composition_order/
+  - _self_ # see https://hydra.cc/docs/1.2/upgrades/1.0_to_1.1/default_composition_order/
 
 # we set certain env vars here for things that are statically initialised
 hydra:
