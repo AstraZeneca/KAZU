@@ -71,6 +71,7 @@ typed = [
   # version 2.31.0.3 introduced
   # overly strict typing of requests.HttpError
   # which was fixed in 2.31.0.6
+  "types-requests",
   "types-cachetools",
   "types-regex",
   "types-psutil",
@@ -92,6 +93,8 @@ dev = [
   "mypy",
   "vulture",
   "bump2version",
+  # docformatter breaks pre-commit on version 4.0. Need to pin this until this issue is resolved: https://github.com/PyCQA/docformatter/issues/289
+  "pre-commit<4.0.0",
   # docformatter breaks pre-commit on version 4.0. Need to pin this until this issue is resolved: https://github.com/PyCQA/docformatter/issues/289
   "pre-commit<4.0.0",
   "pytest",
