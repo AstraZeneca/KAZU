@@ -65,7 +65,8 @@ webserver = [
   "PyJWT>=2.0.0",
 ]
 llm = [
-  "openai", # Required for OpenAI API
+  "google-cloud-aiplatform", # Required for vertex API
+  "openai",                  # Required for OpenAI API
 ]
 typed = [
   # version 2.31.0.3 introduced
