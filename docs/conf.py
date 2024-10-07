@@ -125,7 +125,6 @@ autodoc_member_order = "groupwise"
 
 intersphinx_mapping = {
     "transformers": ("https://huggingface.co/docs/transformers/main/en/", None),
-    "pytorch_lightning": ("https://lightning.ai/docs/pytorch/stable/", None),
     "torch": ("https://pytorch.org/docs/stable/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "pandas": ("https://pandas.pydata.org/docs/", None),
@@ -207,16 +206,12 @@ cross_reference_override_mapping = {
     "transformers.tokenization_utils_fast.PreTrainedTokenizerFast": "transformers.PreTrainedTokenizerFast",
     "transformers.utils.generic.PaddingStrategy": "transformers.utils.PaddingStrategy",
     "lightning_fabric.plugins.io.checkpoint_io.CheckpointIO": "lightning.pytorch.plugins.io.CheckpointIO",
-    "pytorch_lightning.core.module.LightningModule": "lightning.pytorch.core.LightningModule",
-    "pytorch_lightning.trainer.trainer.Trainer": "lightning.pytorch.trainer.trainer.Trainer",
     "urllib3.util.retry.Retry": "urllib3.util.Retry",
     "scipy.sparse._csr.csr_matrix": "scipy.sparse.csr_matrix",
 }
 
 
 nitpick_ignore = [
-    # this doesn't exist anymore in lightning 2.0, it becomes on_validation_epoch_end, and there's some migration work for changing to it
-    ("py:meth", "pytorch_lightning.core.LightningModule.validation_epoch_end"),
     # this doesn't appear to have an entry in the transformers docs for some reason.
     ("py:class", "transformers.models.bert.modeling_bert.BertPreTrainedModel"),
     # the kazu.utils.grouping.Key TypeVar tries to generate this automatically.
