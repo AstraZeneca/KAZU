@@ -63,7 +63,8 @@ webserver = [
   "PyJWT>=2.0.0",
 ]
 llm = [
-  "openai", # Required for OpenAI API
+  "google-cloud-aiplatform", # Required for vertex API
+  "openai",                  # Required for OpenAI API
 ]
 typed = [
   # version 2.31.0.3 introduced
@@ -202,8 +203,7 @@ disallow_untyped_defs = false
 # the numbers can be re-calculated with:
 # mypy kazu docs conftest.py | cut -f 1,2 -d ':' | sed '$d' | sort | uniq | cut -f 1 -d ':' | uniq -c | sort --reverse | awk '{file_without_dot_py = substr($2, 0, length($2)-3); gsub("/", ".", file_without_dot_py); print "  \""file_without_dot_py"\",  # "$1}'
 module = [
-  "kazu.linking.sapbert.train", # 4
-  "kazu.utils.spacy_pipeline",  # 2
+  "kazu.utils.spacy_pipeline", # 2
 ]
 # we had a bunch of these in the codebase before we moved to a 'strict' mypy config, and it was too many
 # to fix at that time for the payoff. Having overrides for the modules that would error rather than
