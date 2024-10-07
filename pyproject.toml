@@ -36,7 +36,7 @@ dependencies = [
   "scikit-learn>=0.24.0",
   # scipy 1.12.0 introduced many changes to the sparse matrices api. https://docs.scipy.org/doc/scipy/reference/sparse.html#module-scipy.sparse
   # This is causing our acceptance tests to fail. Pinning to <1.12.0 until it's confirmed other libraries (e.g. sk-learn) don't have issues.
-  "scipy",
+  "scipy<1.12.0",
   "regex>=2020.1.7",
   "psutil>=5.3.0",
   "cachetools>=5.2.0",
