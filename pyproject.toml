@@ -63,8 +63,7 @@ webserver = [
   "PyJWT>=2.0.0",
 ]
 llm = [
-  "google-cloud-aiplatform", # Required for vertex API
-  "openai",                  # Required for OpenAI API
+  "openai", # Required for OpenAI API
 ]
 typed = [
   # version 2.31.0.3 introduced
@@ -77,16 +76,6 @@ typed = [
   "pandas-stubs>=2.0.0",
   "types-tqdm",
 ]
-model-training = [
-  "pytorch-metric-learning>=0.9.99",
-  "seqeval>=1.0.0",
-  "pytorch-lightning>=1.7.4,<2.0.0",
-  # version 0.10.0 causes the model
-  # inference to fail, and lightning
-  # itself doesn't restrict strictly
-  # enough
-  "lightning-utilities==0.9.0",
-]
 all-steps = [
   "py4j>=0.10.9",
   "rdkit>=2023.3.1",
@@ -94,7 +83,7 @@ all-steps = [
   "gliner==0.1.7",        # GLINER is under active development, so pinning version until API stabilises
 ]
 dev = [
-  "kazu[webserver,typed,model-training,all-steps,model-training,llm]",
+  "kazu[webserver,typed,all-steps,llm]",
   "black~=22.0",
   "blacken-docs",
   "flake8",
@@ -107,7 +96,7 @@ dev = [
   "pytest-cov",
   "pytest-timeout",
   "hypothesis",
-  "sphinx>=7.2,<8.0",                                                  # 8.0.0 breaks our docs at the moment
+  "sphinx>=7.2,<8.0",                    # 8.0.0 breaks our docs at the moment
   "myst_parser",
   "furo>=2023.08.17",
   # to allow profiling
@@ -211,11 +200,8 @@ disallow_untyped_defs = false
 # the numbers can be re-calculated with:
 # mypy kazu docs conftest.py | cut -f 1,2 -d ':' | sed '$d' | sort | uniq | cut -f 1 -d ':' | uniq -c | sort --reverse | awk '{file_without_dot_py = substr($2, 0, length($2)-3); gsub("/", ".", file_without_dot_py); print "  \""file_without_dot_py"\",  # "$1}'
 module = [
-  "kazu.distillation.models",            # 10
-  "kazu.linking.sapbert.train",          # 4
-  "kazu.utils.spacy_pipeline",           # 2
-  "kazu.distillation.tiny_transformers", # 2
-  "kazu.distillation.metrics",           # 1
+  "kazu.linking.sapbert.train", # 4
+  "kazu.utils.spacy_pipeline",  # 2
 ]
 # we had a bunch of these in the codebase before we moved to a 'strict' mypy config, and it was too many
 # to fix at that time for the payoff. Having overrides for the modules that would error rather than
@@ -230,7 +216,6 @@ disallow_untyped_defs = false
 module = [
   "kazu.data",                                                         # 13
   "kazu.annotation.label_studio",                                      # 9
-  "kazu.distillation.models",                                          # 8
   "kazu.linking.sapbert.train",                                        # 6
   "kazu.steps.linking.post_processing.xref_manager",                   # 3
   "kazu.steps.linking.post_processing.mapping_strategies.strategies",  # 3
