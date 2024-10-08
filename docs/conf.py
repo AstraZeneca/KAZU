@@ -132,7 +132,6 @@ intersphinx_mapping = {
     "sklearn": ("https://scikit-learn.org/stable/", None),
     "diskcache": ("https://grantjenks.com/docs/diskcache/", None),
     "rdflib": ("https://rdflib.readthedocs.io/en/stable/", None),
-    "pymongo": ("https://pymongo.readthedocs.io/en/stable/", None),
     # pymongo includes bson
     "bson": ("https://pymongo.readthedocs.io/en/stable/", None),
     "requests": ("https://requests.readthedocs.io/en/latest/", None),
