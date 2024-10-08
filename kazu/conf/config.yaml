@@ -26,7 +26,6 @@ defaults:
   - SpacyNerStep: default
   - TransformersModelForTokenClassificationNerStep: default
   - DictionaryEntityLinkingStep: default
-  - SapBertTraining: default
   - Pipeline: default
   - OpsinStep: default
   - SethStep: default
