@@ -509,9 +509,11 @@ class ParserSelector:
             "SELECT PARSER",
             options=sorted(choices),
             index=None,
-            on_change=ParserSelector.submit_form_and_clear_state
-            if clear_state
-            else ParserSelector.submit_form_and_keep_state,
+            on_change=(
+                ParserSelector.submit_form_and_clear_state
+                if clear_state
+                else ParserSelector.submit_form_and_keep_state
+            ),
             key=ParserSelector.PARSER_SELECTOR,
         )
 

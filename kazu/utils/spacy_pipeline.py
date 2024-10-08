@@ -173,8 +173,7 @@ class SpacyPipelines(metaclass=Singleton):
         model_name: str,
         as_tuples: Literal[True],
         **kwargs: Any,
-    ) -> Iterable[tuple[Doc, Any]]:
-        ...
+    ) -> Iterable[tuple[Doc, Any]]: ...
 
     @overload
     def process_batch(
@@ -183,8 +182,7 @@ class SpacyPipelines(metaclass=Singleton):
         model_name: str,
         as_tuples: Literal[False] = False,
         **kwargs: Any,
-    ) -> Iterable[Doc]:
-        ...
+    ) -> Iterable[Doc]: ...
 
     def process_batch(
         self,

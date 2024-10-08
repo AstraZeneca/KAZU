@@ -110,6 +110,7 @@ class OpsinStep(Step):
 
         opsin_step: OpsinStep = instantiate(kazu_config.OpsinStep)
 
+
         # function to make the doctests shorter
         def op(s: str) -> str:
             mapping: Optional[Mapping] = opsin_step.parseString(s)
@@ -292,7 +293,7 @@ class OpsinStep(Step):
                     if len(ent.mappings) == 0:
                         # entity mapping failed, e.g. no exact matches to dictionaries
                         # look up to two spaces out
-                        for (match, start, end) in self.extendString(ent, section.text, spaces=2):
+                        for match, start, end in self.extendString(ent, section.text, spaces=2):
                             maybe_mapping = self.parseString(match)
                             if maybe_mapping:
                                 opsin_entity = dataclasses.replace(

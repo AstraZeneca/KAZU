@@ -71,7 +71,7 @@ class CrossReferenceManager(ABC):
         :return:
         """
         xref_lookup = self.xref_db.get(mapping.source, {})
-        for (target_source, target_idx) in xref_lookup.get(mapping.idx, []):
+        for target_source, target_idx in xref_lookup.get(mapping.idx, []):
             metadata_parser_name = self.source_to_parser_metadata_lookup.get(target_source)
             if metadata_parser_name is None:
                 logger.warning(

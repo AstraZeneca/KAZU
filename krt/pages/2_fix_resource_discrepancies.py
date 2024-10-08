@@ -37,9 +37,9 @@ parser_name = ParserSelector.get_selected_parser_name()
 if parser_name:
     manager = get_resource_merge_manager_for_parser(parser_name)
     if ResourceDiscrepancyResolutionForm.state_key(parser_name) not in st.session_state:
-        st.session_state[
-            ResourceDiscrepancyResolutionForm.state_key(parser_name)
-        ] = ResourceDiscrepancyResolutionForm(manager)
+        st.session_state[ResourceDiscrepancyResolutionForm.state_key(parser_name)] = (
+            ResourceDiscrepancyResolutionForm(manager)
+        )
 
     form = st.session_state[ResourceDiscrepancyResolutionForm.state_key(parser_name)]
     with st.container(border=True):

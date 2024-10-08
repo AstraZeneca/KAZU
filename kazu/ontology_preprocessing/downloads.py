@@ -1,4 +1,5 @@
 """Some functions to update public resources in the kazu model pack."""
+
 import abc
 import datetime
 import functools
