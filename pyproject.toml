@@ -16,7 +16,8 @@ classifiers = [
 ]
 dependencies = [
   # pinning spacy because larger versions cause dependcy issues with thinc and various packages on 7/10/2024
-  "spacy==3.2.2",
+  # Also needs to be at least 3.4.2 on python 3.11 (see https://github.com/explosion/spaCy/issues/12697)
+  "spacy==3.7.0",
   # note to kazu devs: if the torch version changes in future,
   # we need to change for CI jobs where we specify this install
   # elsewhere because of the CPU wheel needing a different pypi index.
@@ -59,7 +60,7 @@ webserver = [
   # UPDATE: 0.109.0 also no longer works. It seems like there's some incompatibility with ray serve here, so pinning to
   # last known good version
   "fastapi==0.108.0",
-  "pydantic<2.0",
+  "pydantic<2.0",      # for the pinned spacy version pydantic should be > 1.8 as well.
   "ray[serve]>=2.0.0",
   "PyJWT>=2.0.0",
 ]
