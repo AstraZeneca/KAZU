@@ -72,8 +72,7 @@ e.g.
 .. code-block:: python
 
     @kazu_disk_cache.memoize(ignore={0})
-    def method_of_class_with_lots_of_args(self):
-        ...
+    def method_of_class_with_lots_of_args(self): ...
 """
 if kazu_model_pack_dir is None:
     kazu_disk_cache_path_str = tempfile.mkdtemp(suffix=KAZU_DISK_CACHE_NAME)

@@ -87,6 +87,7 @@ def document_iterating_step(
         input document: the return value is ignored.
     :return:
     """
+
     # note - this excludes __annotations__ as the returned function has a different type signature
     @wraps(per_doc_callable, assigned=("__module__", "__name__", "__qualname__", "__doc__"))
     def step_call(self: Self, docs: list[Document]) -> tuple[list[Document], list[Document]]:
@@ -132,6 +133,7 @@ def document_batch_step(
         input documents: the return value is ignored.
     :return:
     """
+
     # note - this excludes __annotations__ as the returned function has a different type signature
     @wraps(batch_doc_callable, assigned=("__module__", "__name__", "__qualname__", "__doc__"))
     def step_call(self: Self, docs: list[Document]) -> tuple[list[Document], list[Document]]:

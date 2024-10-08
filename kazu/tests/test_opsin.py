@@ -163,7 +163,7 @@ class TestOpsinExtendString:
             namespace="test",
         )
         result = tuple(OpsinStep.extendString(e, section, spaces))
-        for (match, start, end) in result:
+        for match, start, end in result:
             assert section[start:end] == match
         result_matches = tuple(match for (match, start, end) in result)
         assert result_matches == expected

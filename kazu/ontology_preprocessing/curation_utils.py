@@ -764,9 +764,7 @@ class OntologyResourceProcessor:
             resource.associated_id_sets is not None,
         )
 
-    def _update_candidate_lookups(
-        self, candidate: LinkingCandidate, override: bool
-    ) -> Literal[
+    def _update_candidate_lookups(self, candidate: LinkingCandidate, override: bool) -> Literal[
         LinkingCandidateModificationResult.LINKING_CANDIDATE_ADDED,
         LinkingCandidateModificationResult.NO_ACTION,
     ]:
@@ -834,9 +832,7 @@ class OntologyResourceProcessor:
                     self.parser_name,
                 )
 
-    def _drop_id_from_all_linking_candidates(
-        self, id_to_drop: Idx
-    ) -> Counter[
+    def _drop_id_from_all_linking_candidates(self, id_to_drop: Idx) -> Counter[
         Literal[
             LinkingCandidateModificationResult.ID_SET_MODIFIED,
             LinkingCandidateModificationResult.LINKING_CANDIDATE_DROPPED,
@@ -1113,9 +1109,9 @@ class OntologyResourceProcessor:
             return LinkingCandidateModificationResult.LINKING_CANDIDATE_DROPPED
 
         if maybe_existing_linking_candidate is not None:
-            log_formatting_dict[
-                "existing_id_set"
-            ] = maybe_existing_linking_candidate.associated_id_sets
+            log_formatting_dict["existing_id_set"] = (
+                maybe_existing_linking_candidate.associated_id_sets
+            )
 
             if (
                 len(

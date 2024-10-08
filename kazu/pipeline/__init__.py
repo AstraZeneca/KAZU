@@ -200,9 +200,9 @@ class Pipeline:
         for doc in docs:
             doc_size = calc_doc_size(doc)
             if doc_size >= self.skip_doc_len:
-                doc.metadata[
-                    PROCESSING_EXCEPTION
-                ] = f"document too long: {doc_size}. max:{self.skip_doc_len}"
+                doc.metadata[PROCESSING_EXCEPTION] = (
+                    f"document too long: {doc_size}. max:{self.skip_doc_len}"
+                )
                 logger.warning(f"skipping doc: {doc.idx}: reason: too long")
             else:
                 docs_to_process.append(doc)
