@@ -8,7 +8,7 @@ parsers:
     _target_: kazu.ontology_preprocessing.parsers.CellularComponentGeneOntologyParser
     name: CC_GENE_ONTOLOGY
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/go.owl
-    data_origin: '2024-06-17'
+    data_origin: "2024-09-08"
     string_scorer: ${SapbertStringSimilarityScorer}
     synonym_generator: ${SynonymGeneration.default}
     entity_class: cellular_component

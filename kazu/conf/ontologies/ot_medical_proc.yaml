@@ -8,14 +8,14 @@ parsers:
     name: OPENTARGETS_MEDICAL_PROC
     _target_: kazu.ontology_preprocessing.parsers.OpenTargetsDiseaseOntologyParser
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/opentargets/diseases
-    data_origin: '24.06'
+    data_origin: "24.09"
     string_scorer: ${SapbertStringSimilarityScorer}
     synonym_generator: ${SynonymGeneration.default}
     entity_class: medical_procedure
     curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${.name}_curations.jsonl
     global_actions: ${global_actions}
     allowed_therapeutic_areas:
-      - 'EFO_0002571'
+      - "EFO_0002571"
     autocurator: ${autocurator.basic}
     ontology_downloader:
       _target_: kazu.ontology_preprocessing.downloads.OpenTargetsOntologyDownloader

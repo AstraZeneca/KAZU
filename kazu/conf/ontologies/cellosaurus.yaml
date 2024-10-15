@@ -8,7 +8,7 @@ parsers:
     _target_: kazu.ontology_preprocessing.parsers.CellosaurusOntologyParser
     name: CELLOSAURUS
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/cellosaurus.obo
-    data_origin: '49.0'
+    data_origin: "50.0"
     string_scorer: ${SapbertStringSimilarityScorer}
     entity_class: cell_line
     curations_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/${.name}_curations.jsonl
