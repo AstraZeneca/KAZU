@@ -8,7 +8,7 @@ parsers:
     _target_: kazu.ontology_preprocessing.parsers.CLOntologyParser
     name: CL
     in_path: ${oc.env:KAZU_MODEL_PACK}/ontologies/cl.owl
-    data_origin: '2024-05-15'
+    data_origin: "2024-09-26"
     string_scorer: ${SapbertStringSimilarityScorer}
     synonym_generator: ${SynonymGeneration.default}
     entity_class: cell_type

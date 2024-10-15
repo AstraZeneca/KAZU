@@ -58,37 +58,37 @@ meddra:
       include_greek: true
     - _target_: kazu.ontology_preprocessing.synonym_generation.TokenListReplacementGenerator
       token_lists_to_consider:
-        -  - anomalous
-           - unusual
-           - atypical
-           - deviant
-           - aberrant
-           - peculiar
-           - eccentric
-           - strange
-           - bizarre
-           - odd
-           - weird
-           - uncommon
-           - freakish
-           - irregular
-           - outlandish
-           - exceptional
-           - unnatural
-           - unhealthy
-           - abnormal
-        -  - typical
-           - ordinary
-           - standard
-           - regular
-           - usual
-           - natural
-           - routine
-           - average
-           - expected
-           - balanced
-           - stable
-           - healthy
+        - - anomalous
+          - unusual
+          - atypical
+          - deviant
+          - aberrant
+          - peculiar
+          - eccentric
+          - strange
+          - bizarre
+          - odd
+          - weird
+          - uncommon
+          - freakish
+          - irregular
+          - outlandish
+          - exceptional
+          - unnatural
+          - unhealthy
+          - abnormal
+        - - typical
+          - ordinary
+          - standard
+          - regular
+          - usual
+          - natural
+          - routine
+          - average
+          - expected
+          - balanced
+          - stable
+          - healthy
 
     - _target_: kazu.ontology_preprocessing.synonym_generation.VerbPhraseVariantGenerator
       spacy_model_path: ${SciSpacyPipeline.path}
@@ -107,112 +107,112 @@ meddra:
         - "{NOUN} {TARGET}"
       lemmas_to_consider:
         increase:
-            - increasing
-            - increased
-            - increases
+          - increasing
+          - increased
+          - increases
 
         expand:
-            - expanding
-            - expands
-            - expanded
+          - expanding
+          - expands
+          - expanded
 
         enhance:
-            - enhancing
-            - enhances
-            - enhanced
+          - enhancing
+          - enhances
+          - enhanced
         raise:
-            - raising
-            - raises
-            - raised
+          - raising
+          - raises
+          - raised
         boost:
-            - boosting
-            - boosts
-            - boosted
+          - boosting
+          - boosts
+          - boosted
         escalate:
-            - escalating
-            - escalates
-            - escalated
+          - escalating
+          - escalates
+          - escalated
         augment:
-            - augmenting
-            - augments
-            - augmented
+          - augmenting
+          - augments
+          - augmented
         intensify:
-            - intensifying
-            - intensifies
-            - intensifed
+          - intensifying
+          - intensifies
+          - intensifed
         amplify:
-            - amplifing
-            - amplifies
-            - amplified
+          - amplifing
+          - amplifies
+          - amplified
         strengthen:
-            - strengthening
-            - strengthens
-            - strengthened
+          - strengthening
+          - strengthens
+          - strengthened
         heighten:
-            - heightening
-            - heightens
-            - heightened
+          - heightening
+          - heightens
+          - heightened
         decrease:
-            - decreasing
-            - decreases
-            - decreased
+          - decreasing
+          - decreases
+          - decreased
         reduce:
-            - reducing
-            - reduces
-            - reduced
+          - reducing
+          - reduces
+          - reduced
         diminish:
-            - diminishing
-            - diminishes
-            - diminished
+          - diminishing
+          - diminishes
+          - diminished
         lower:
-            - lowering
-            - lowers
-            - lowered
+          - lowering
+          - lowers
+          - lowered
         minimize:
-            - minimizing
-            - minimizes
-            - minimized
+          - minimizing
+          - minimizes
+          - minimized
         minimise:
-            - minimising
-            - minimises
-            - minimised
+          - minimising
+          - minimises
+          - minimised
         curtail:
-            - curtailing
-            - curtails
-            - curtailed
+          - curtailing
+          - curtails
+          - curtailed
         shrink:
-            - shrinking
-            - shrinks
-            - shrinked
+          - shrinking
+          - shrinks
+          - shrinked
         contract:
-            - contracting
-            - contracts
-            - contracted
+          - contracting
+          - contracts
+          - contracted
         narrow:
-            - narrowing
-            - narrows
-            - narrowed
+          - narrowing
+          - narrows
+          - narrowed
         taper:
-            - tapering
-            - tapers
-            - tapered
+          - tapering
+          - tapers
+          - tapered
         constrict:
-            - constricting
-            - constricts
-            - constricted
+          - constricting
+          - constricts
+          - constricted
         dwindle:
-            - dwindling
-            - dwindles
-            - dwindled
+          - dwindling
+          - dwindles
+          - dwindled
         subside:
-            - subsiding
-            - subsides
-            - subsided
+          - subsiding
+          - subsides
+          - subsided
         weaken:
-            - weakening
-            - weakens
-            - weakened
+          - weakening
+          - weakens
+          - weakened
         decrement:
-            - decrementing
-            - decrements
-            - decremented
+          - decrementing
+          - decrements
+          - decremented
