@@ -249,6 +249,57 @@ def test_greek_substitution_dict_uncode_variants():
                 StringReplacement(replacement_dict={"-": [" ", "_"]}, include_greek=False),
             ],
         ),
+        (
+            OntologyStringResource(
+                original_synonyms=frozenset(
+                    [
+                        Synonym(
+                            text="estimate",
+                            mention_confidence=MentionConfidence.PROBABLE,
+                            case_sensitive=False,
+                        ),
+                        Synonym(
+                            text="estimate of",
+                            mention_confidence=MentionConfidence.PROBABLE,
+                            case_sensitive=False,
+                        ),
+                    ]
+                ),
+                behaviour=OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
+            ),
+            set(),
+            [
+                StopWordRemover(),  # normally stopword remover would remove 'of' but since "estimate" is an original synonym
+                # CombinatorialSynonymGenerator will skip the alternative synonym generation
+            ],
+        ),
+        (
+            OntologyStringResource(
+                original_synonyms=frozenset(
+                    [
+                        Synonym(
+                            text="estimate of",
+                            mention_confidence=MentionConfidence.PROBABLE,
+                            case_sensitive=False,
+                        ),
+                    ]
+                ),
+                behaviour=OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
+                alternative_synonyms=frozenset(
+                    [
+                        Synonym(
+                            text="estimate",
+                            mention_confidence=MentionConfidence.PROBABLE,
+                            case_sensitive=False,
+                        )
+                    ]
+                ),
+            ),
+            {"estimate"},
+            [
+                StopWordRemover(),
+            ],
+        ),
     ),
 )
 def test_CombinatorialSynonymGenerator(resource, expected_syns, generators):
