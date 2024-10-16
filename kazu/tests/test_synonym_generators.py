@@ -1,6 +1,7 @@
 import unicodedata
 from sys import maxunicode
 
+from omegaconf import DictConfig
 import pytest
 from kazu.data import (
     OntologyStringResource,
@@ -26,7 +27,7 @@ def check_generator_result(
     input_str: str,
     expected_syns: set[str],
     generator: SynonymGenerator,
-):
+) -> None:
     new_syns = generator(input_str)
     assert new_syns == expected_syns
 
@@ -58,11 +59,11 @@ def check_generator_result(
         ),
     ),
 )
-def test_SeparatorExpansion(input_str, expected_syns):
+def test_SeparatorExpansion(input_str: str, expected_syns: set[str]) -> None:
     check_generator_result(input_str, expected_syns, SeparatorExpansion())
 
 
-def test_StopWordRemover():
+def test_StopWordRemover() -> None:
     generator = StopWordRemover()
     check_generator_result(
         input_str="The cat sat in the mat",
@@ -71,7 +72,7 @@ def test_StopWordRemover():
     )
 
 
-def test_StringReplacement():
+def test_StringReplacement() -> None:
     generator = StringReplacement(replacement_dict={"cat": ["dog", "chicken"]})
     check_generator_result(
         input_str="The cat sat on the mat",
@@ -131,11 +132,13 @@ def greek_symbol_generator() -> StringReplacement:
         ),
     ),
 )
-def test_GreekSymbolSubstitution(input_str, expected_syns, greek_symbol_generator):
+def test_GreekSymbolSubstitution(
+    input_str: str, expected_syns: set[str], greek_symbol_generator: StringReplacement
+) -> None:
     check_generator_result(input_str, expected_syns, greek_symbol_generator)
 
 
-def test_TokenListReplacementGenerator():
+def test_TokenListReplacementGenerator() -> None:
     generator = TokenListReplacementGenerator(
         token_lists_to_consider=[["typical", "ordinary"], ["abnormal", "incorrect"]],
     )
@@ -148,7 +151,7 @@ def test_TokenListReplacementGenerator():
 
 
 @requires_model_pack
-def test_VerbPhraseVariantGenerator(kazu_test_config):
+def test_VerbPhraseVariantGenerator(kazu_test_config: DictConfig) -> None:
     generator = VerbPhraseVariantGenerator(
         tense_templates=["{NOUN} {TARGET}", "{TARGET} in {NOUN}"],
         spacy_model_path=kazu_test_config.SciSpacyPipeline.path,
@@ -182,7 +185,7 @@ def test_VerbPhraseVariantGenerator(kazu_test_config):
     check_generator_result(input_str, expected_syns, generator)
 
 
-def test_greek_substitution_is_stripped():
+def test_greek_substitution_is_stripped() -> None:
     for k, val_set in GreekSymbolSubstitution.ALL_SUBS.items():
         assert k.strip() == k
         assert all(val.strip() == val for val in val_set)
@@ -191,7 +194,7 @@ def test_greek_substitution_is_stripped():
 @pytest.mark.xfail(
     reason="awkward casing behaviour where there are e.g. multiple uppercase theta's in unicode."
 )
-def test_greek_substitution_dict_casing():
+def test_greek_substitution_dict_casing() -> None:
     for k, val_set in GreekSymbolSubstitution.ALL_SUBS.items():
         for v in val_set:
             # if we substitute to a greek letter, we should sub
@@ -206,7 +209,7 @@ def test_greek_substitution_dict_casing():
 
 
 @pytest.mark.xfail(reason="haven't covered (or marked as exceptions) all unicode greek chars yet")
-def test_greek_substitution_dict_uncode_variants():
+def test_greek_substitution_dict_uncode_variants() -> None:
     for i in range(maxunicode):
         char = chr(i)
         try:
@@ -302,7 +305,9 @@ def test_greek_substitution_dict_uncode_variants():
         ),
     ),
 )
-def test_CombinatorialSynonymGenerator(resource, expected_syns, generators):
+def test_CombinatorialSynonymGenerator(
+    resource: OntologyStringResource, expected_syns: set[str], generators: list[SynonymGenerator]
+) -> None:
     generator = CombinatorialSynonymGenerator(generators)
     generated_resources = generator({resource})
     new_syns = {s.text for resource in generated_resources for s in resource.alternative_synonyms}
