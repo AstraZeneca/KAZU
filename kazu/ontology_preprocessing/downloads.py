@@ -224,7 +224,6 @@ class OpenTargetsOntologyDownloader(OntologyDownloader):
         self.open_targets_version = open_targets_version
 
     @staticmethod
-    @functools.cache
     def _cached_wget(full_url: str, cwd: Path) -> None:
         args = _get_proxy_args_for_wget()
         args.extend(
