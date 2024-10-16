@@ -1,6 +1,5 @@
 import unicodedata
 from sys import maxunicode
-from typing import Union
 
 import pytest
 from kazu.data import (
@@ -26,28 +25,9 @@ from kazu.tests.utils import requires_model_pack
 def check_generator_result(
     input_str: str,
     expected_syns: set[str],
-    generator: Union[CombinatorialSynonymGenerator, SynonymGenerator],
+    generator: SynonymGenerator,
 ):
-    if isinstance(generator, CombinatorialSynonymGenerator):
-        resource = OntologyStringResource(
-            original_synonyms=frozenset(
-                [
-                    Synonym(
-                        text=input_str,
-                        mention_confidence=MentionConfidence.PROBABLE,
-                        case_sensitive=False,
-                    )
-                ]
-            ),
-            behaviour=OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
-        )
-        generated_resources = generator({resource})
-        new_syns = {
-            s.text for resource in generated_resources for s in resource.alternative_synonyms
-        }
-
-    else:
-        new_syns = generator(input_str)
+    new_syns = generator(input_str)
     assert new_syns == expected_syns
 
 
@@ -238,24 +218,41 @@ def test_greek_substitution_dict_uncode_variants():
             pass
 
 
-def test_CombinatorialSynonymGenerator():
-    generator = CombinatorialSynonymGenerator(
-        [
-            StringReplacement(include_greek=True),
-            StringReplacement(replacement_dict={"-": [" ", "_"]}, include_greek=False),
-        ]
-    )
-    check_generator_result(
-        input_str="alpha-thalassaemia",
-        expected_syns={
-            "alpha thalassaemia",
-            "alpha_thalassaemia",
-            "α-thalassaemia",
-            "α thalassaemia",
-            "α_thalassaemia",
-            "Α-thalassaemia",
-            "Α thalassaemia",
-            "Α_thalassaemia",
-        },
-        generator=generator,
-    )
+@pytest.mark.parametrize(
+    argnames=("resource", "expected_syns", "generators"),
+    argvalues=(
+        (
+            OntologyStringResource(
+                original_synonyms=frozenset(
+                    [
+                        Synonym(
+                            text="alpha-thalassaemia",
+                            mention_confidence=MentionConfidence.PROBABLE,
+                            case_sensitive=False,
+                        )
+                    ]
+                ),
+                behaviour=OntologyStringBehaviour.ADD_FOR_NER_AND_LINKING,
+            ),
+            {
+                "alpha thalassaemia",
+                "alpha_thalassaemia",
+                "α-thalassaemia",
+                "α thalassaemia",
+                "α_thalassaemia",
+                "Α-thalassaemia",
+                "Α thalassaemia",
+                "Α_thalassaemia",
+            },
+            [
+                StringReplacement(include_greek=True),
+                StringReplacement(replacement_dict={"-": [" ", "_"]}, include_greek=False),
+            ],
+        ),
+    ),
+)
+def test_CombinatorialSynonymGenerator(resource, expected_syns, generators):
+    generator = CombinatorialSynonymGenerator(generators)
+    generated_resources = generator({resource})
+    new_syns = {s.text for resource in generated_resources for s in resource.alternative_synonyms}
+    assert new_syns == expected_syns
