@@ -63,7 +63,7 @@ class CombinatorialSynonymGenerator:
         )
         final_results: defaultdict[OntologyStringResource, set[Synonym]] = defaultdict(set)
         original_strings = {
-            syn.text for resource in ontology_resources for syn in resource.active_ner_synonyms()
+            syn.text for resource in ontology_resources for syn in resource.original_synonyms
         }
         for i, permutation_list in enumerate(synonym_gen_permutations):
             logger.info(
@@ -80,9 +80,7 @@ class CombinatorialSynonymGenerator:
                     desc=f"generating synonyms for {generator.__class__.__name__}",
                 ):
 
-                    for syn in list(
-                        generated_results.get(resource, resource.active_ner_synonyms())
-                    ):
+                    for syn in list(generated_results.get(resource, resource.original_synonyms)):
                         new_strings = generator(syn.text)
                         for new_syn_text in new_strings:
                             if new_syn_text in original_strings:
