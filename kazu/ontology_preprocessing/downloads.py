@@ -224,7 +224,7 @@ class OpenTargetsOntologyDownloader(OntologyDownloader):
         self.open_targets_version = open_targets_version
 
     @staticmethod
-    def _cached_wget(full_url: str, cwd: Path) -> None:
+    def _wget(full_url: str, cwd: Path) -> None:
         args = _get_proxy_args_for_wget()
         args.extend(
             [
@@ -241,7 +241,7 @@ class OpenTargetsOntologyDownloader(OntologyDownloader):
     def download(self, local_path: Path, skip_download: bool = False) -> Path:
         if not skip_download:
             full_url = f"{self.OT_PREFIX}{self.open_targets_version}/output/etl/json/{self.open_targets_dataset_name}"
-            OpenTargetsOntologyDownloader._cached_wget(full_url, local_path.parent)
+            OpenTargetsOntologyDownloader._wget(full_url, local_path.parent)
         return local_path
 
     def version(self, local_path: Optional[Path] = None) -> str:
