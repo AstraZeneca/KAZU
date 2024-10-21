@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- towncrier release notes start -->
 
+## 2.2.1 - 2024-10-21
+
+### Features
+
+- Update ontologies to later versions (ontology_updates)
+
+### Bugfixes
+
+- Fix synonym generator to only check if strings exist in original synonyms. Update tests (combinatorial_synonym_generator)
+- Remove save/reset button not belonging on page 1 (krt)
+
+
 ## 2.2.0 - 2024-09-18
 
 ### Features
