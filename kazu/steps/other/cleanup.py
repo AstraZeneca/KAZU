@@ -93,6 +93,30 @@ class DropUnmappedEntityFilter:
             )
 
 
+class DropEntityIfClassNotMatchedFilter:
+    def __init__(self, required_classes: Iterable[str]):
+        self.required_classes = set(required_classes)
+
+    def __call__(self, entity: Entity) -> bool:
+        return entity.entity_class not in self.required_classes
+
+
+class DropEntityIfMatchInSetFilter:
+    def __init__(self, drop_dict: dict[str, Iterable[str]]):
+        self.drop_dict = {k: set(v) for k, v in drop_dict.items()}
+
+    def __call__(self, entity: Entity) -> bool:
+        return entity.match.lower() in self.drop_dict.get(entity.entity_class, set())
+
+
+class DropByMinLenFilter:
+    def __init__(self, min_len: int):
+        self.min_len = min_len
+
+    def __call__(self, entity: Entity) -> bool:
+        return len(entity.match) < self.min_len
+
+
 class LinkingCandidateRemovalCleanupAction:
     def __init__(self) -> None:
         pass
