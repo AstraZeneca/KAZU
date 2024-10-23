@@ -564,7 +564,7 @@ class LabelStudioManager:
         pass
 
     @overload
-    def update_view(self, view: LabelStudioAnnotationView, docs: list[set[Document]]) -> None:
+    def update_view(self, view: LabelStudioAnnotationView, docs: list[list[Document]]) -> None:
         pass
 
     def update_view(self, view, docs):  # type: ignore[no-untyped-def]
@@ -601,7 +601,7 @@ class LabelStudioManager:
         pass
 
     @overload
-    def update_tasks(self, docs: list[set[Document]]) -> None:
+    def update_tasks(self, docs: list[list[Document]]) -> None:
         pass
 
     def update_tasks(self, docs):  # type: ignore[no-untyped-def]
