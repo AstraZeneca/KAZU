@@ -18,7 +18,7 @@ class LSWebUtils:
         self.ls_converter = ls_converter
 
     def kazu_doc_to_ls(self, doc: Document) -> tuple[LSView, list[LSTask]]:
-        ls_tasks = list(self.ls_converter.convert_single_doc_to_tasks(doc))
+        ls_tasks = list(self.ls_converter.convert_single_doc_to_tasks(doc, False))
         ls_view = self.ls_view_generator.create_main_view(ls_tasks)
         return ls_view, ls_tasks
 
