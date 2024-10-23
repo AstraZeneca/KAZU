@@ -36,19 +36,27 @@ class KazuToLabelStudioConverter:
     """
 
     @classmethod
-    def convert_multiple_docs_to_tasks(cls, docs: Iterable[set[Document]]) -> Iterable[dict]:
+    def convert_multiple_docs_to_tasks(cls, docs: Iterable[list[Document]]) -> Iterable[dict]:
         """If you want to utilise multiple annotation views in label studio, you can
         supply an iterable of sets of kazu documents annotated by different pipelines.
         The entity information from each will be added to an independent annotation set
         in label studio.
 
+        index 0  of the sublist is assumed to be ground truth.
+
         :param docs:
         :return:
         """
         for differently_annotated_parallel_docs in docs:
-            all_tasks = (
-                cls.convert_single_doc_to_tasks(doc) for doc in differently_annotated_parallel_docs
+            all_tasks = []
+            all_tasks.append(
+                cls.convert_single_doc_to_tasks(differently_annotated_parallel_docs[0], True)
             )
+            all_tasks.extend(
+                cls.convert_single_doc_to_tasks(doc, False)
+                for doc in differently_annotated_parallel_docs[1:]
+            )
+
             for parallel_tasks in zip(*all_tasks, strict=True):
                 first_task = parallel_tasks[0]
                 other_tasks = parallel_tasks[1:]
@@ -61,26 +69,32 @@ class KazuToLabelStudioConverter:
                 # The extend here results in a list with a set of annotations for every original doc,
                 # which is what we want to signal to label studio 'this task has been annotated differently
                 # by several different annotation processes
-                result["annotations"].extend(chain(t["annotations"] for t in other_tasks))
+                result["annotations"].extend(chain(t["annotations"][0] for t in other_tasks))
                 yield result
 
     @classmethod
-    def convert_single_doc_to_tasks(cls, doc: Document) -> Iterable[dict]:
-        doc_id = doc.idx
+    def convert_single_doc_to_tasks(cls, doc: Document, ground_truth: bool) -> Iterable[dict]:
+
         for i, section in enumerate(doc.sections):
-            idx = f"{doc_id}_{section.name}_{i}"
-            data = {}
+            data: dict[str, Any] = {}
             data["text"] = section.text
-            data["id"] = idx
+            meta: dict[str, Any] = {}
+            meta["doc_id"] = doc.idx
+            meta["section_sequence"] = i
+            data["meta"] = meta
             annotations = []
             result_values = cls._create_label_studio_labels(section.entities, section.text)
-            annotation = {"id": idx, "result": result_values}
+            annotation: dict[str, Any] = {"result": result_values}
+            if ground_truth:
+                annotation["ground_truth"] = True
+            else:
+                annotation["ground_truth"] = False
             annotations.append(annotation)
             yield {"data": data, "annotations": annotations}
 
     @classmethod
     def convert_docs_to_tasks(cls, docs: list[Document]) -> list[dict]:
-        return [task for doc in docs for task in cls.convert_single_doc_to_tasks(doc)]
+        return [task for doc in docs for task in cls.convert_single_doc_to_tasks(doc, False)]
 
     @staticmethod
     def _create_label_studio_labels(
@@ -88,9 +102,9 @@ class KazuToLabelStudioConverter:
         text: str,
     ) -> list[dict]:
         result_values: list[dict] = []
+        region_id = 0
         for ent in entities:
-            ent_hash = hash(ent)
-            prev_region_id: Optional[str] = None
+            prev_region_id: Optional[int] = None
             if len(ent.spans) > 2:
                 logger.warning(
                     """Currently we can't handle entities with 3 spans.
@@ -101,29 +115,27 @@ class KazuToLabelStudioConverter:
                     Adding this warning as a safeguard"""
                 )
             for span in ent.spans:
-                region_id_str = f"{ent_hash}_{span}"
                 match = text[span.start : span.end]
                 ner_region = KazuToLabelStudioConverter._create_ner_region(
-                    ent, region_id_str, span, match
+                    ent, region_id, span, match
                 )
                 result_values.append(ner_region)
                 result_normalisation_value = KazuToLabelStudioConverter._create_mapping_region(
-                    ent, region_id_str, span, match
+                    ent, region_id, span, match
                 )
                 result_values.append(result_normalisation_value)
                 if prev_region_id is not None:
                     result_values.append(
                         KazuToLabelStudioConverter._create_non_contig_entity_links(
-                            prev_region_id, region_id_str
+                            prev_region_id, region_id
                         )
                     )
-                prev_region_id = region_id_str
+                prev_region_id = region_id
+                region_id += 1
         return result_values
 
     @staticmethod
-    def _create_non_contig_entity_links(
-        from_id: str, to_id: str
-    ) -> dict[str, Union[str, list[str]]]:
+    def _create_non_contig_entity_links(from_id: int, to_id: int) -> dict[str, Any]:
         return {
             "from_id": from_id,
             "to_id": to_id,
@@ -134,7 +146,7 @@ class KazuToLabelStudioConverter:
 
     @staticmethod
     def _create_mapping_region(
-        ent: Entity, region_id: str, span: CharSpan, match: str
+        ent: Entity, region_id: int, span: CharSpan, match: str
     ) -> dict[str, Any]:
 
         return {
@@ -162,7 +174,7 @@ class KazuToLabelStudioConverter:
 
     @staticmethod
     def _create_ner_region(
-        ent: Entity, region_id: str, span: CharSpan, match: str
+        ent: Entity, region_id: int, span: CharSpan, match: str
     ) -> dict[str, Any]:
         return {
             "id": region_id,
@@ -565,7 +577,7 @@ class LabelStudioManager:
             information will form a seperate annotation set in label studio.
         :return:
         """
-        if isinstance(docs[0], set):
+        if isinstance(docs[0], list):
             tasks = list(KazuToLabelStudioConverter.convert_multiple_docs_to_tasks(docs))
         else:
             tasks = KazuToLabelStudioConverter.convert_docs_to_tasks(docs)
@@ -601,7 +613,7 @@ class LabelStudioManager:
             information will form a seperate annotation set in label studio.
         :return:
         """
-        if isinstance(docs[0], set):
+        if isinstance(docs[0], list):
             tasks = list(KazuToLabelStudioConverter.convert_multiple_docs_to_tasks(docs))
         else:
             tasks = KazuToLabelStudioConverter.convert_docs_to_tasks(docs)
