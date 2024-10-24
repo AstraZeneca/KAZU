@@ -65,10 +65,18 @@ class DebertaForMultiLabelTokenClassification(DebertaV2ForTokenClassification): 
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
     ) -> Union[Tuple, TokenClassifierOutput]:  # type:ignore[type-arg]
-        r"""Labels (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
-        *optional*):
+        """
 
-        Labels for computing the token classification loss. Indices should be in `[0, ..., config.num_labels - 1]`.
+        :param input_ids:
+        :param attention_mask:
+        :param token_type_ids:
+        :param position_ids:
+        :param inputs_embeds:
+        :param labels:
+        :param output_attentions:
+        :param output_hidden_states:
+        :param return_dict:
+        :return:
         """
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
@@ -111,12 +119,19 @@ class DistilBertForMultiLabelTokenClassification(DistilBertForTokenClassificatio
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
     ) -> Union[TokenClassifierOutput, Tuple[torch.Tensor, ...]]:
-        r"""Labels (:obj:`torch.LongTensor` of shape :obj:`(batch_size, sequence_length,
-        self.num_labels)`, `optional`):
-
-        Labels for computing the token classification loss. Indices should be in ``[0, 1]``.
-        Each token has a vector of self.num_labels float values.
         """
+
+        :param input_ids:
+        :param attention_mask:
+        :param head_mask:
+        :param inputs_embeds:
+        :param labels:
+        :param output_attentions:
+        :param output_hidden_states:
+        :param return_dict:
+        :return:
+        """
+
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
         outputs = self.distilbert(
@@ -160,10 +175,19 @@ class BertForMultiLabelTokenClassification(BertForTokenClassification):  # type:
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
     ) -> Union[TokenClassifierOutput, Tuple[torch.Tensor, ...]]:
-        r"""Labels (`torch.LongTensor` of shape `(batch_size, sequence_length)`,
-        *optional*):
+        """
 
-        Labels for computing the token classification loss. Indices should be in `[0, ..., config.num_labels - 1]`.
+        :param input_ids:
+        :param attention_mask:
+        :param token_type_ids:
+        :param position_ids:
+        :param head_mask:
+        :param inputs_embeds:
+        :param labels:
+        :param output_attentions:
+        :param output_hidden_states:
+        :param return_dict:
+        :return:
         """
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
