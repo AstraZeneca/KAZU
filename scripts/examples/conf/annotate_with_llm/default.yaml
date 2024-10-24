@@ -5,6 +5,7 @@ pipeline:
     - _target_: kazu.steps.ner.llm_ner.LLMNERStep
       result_parser:
         _target_: kazu.steps.ner.llm_ner.StructuredOutputResultParser
+        entity_key: top_level_category
       section_processing_strategy:
         _target_: kazu.steps.ner.llm_ner.SectionProcessingStrategy
         _args_:
