@@ -191,6 +191,7 @@ module = [
   "mwparserfromhell.*",
   "gliner.*",
   "vertexai.*",
+  "pyarrow.*"
 ]
 ignore_missing_imports = true
 

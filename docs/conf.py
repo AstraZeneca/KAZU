@@ -213,6 +213,19 @@ cross_reference_override_mapping = {
 nitpick_ignore = [
     # this doesn't appear to have an entry in the transformers docs for some reason.
     ("py:class", "transformers.models.bert.modeling_bert.BertPreTrainedModel"),
+    ("py:class", "transformers.models.bert.modeling_bert.BertForTokenClassification"),
+    ("py:class", "transformers.configuration_utils.PretrainedConfig"),
+    (
+        "py:class",
+        "transformers.models.deberta_v2.modeling_deberta_v2.DebertaV2ForTokenClassification",
+    ),
+    (
+        "py:class",
+        "transformers.models.distilbert.modeling_distilbert.DistilBertForTokenClassification",
+    ),
+    # pytorch doesn't have an objects.inv file, so we can't link to it directly
+    ("py:obj", "torch.LongTensor"),
+    ("py:class", "torch.LongTensor"),
     # the kazu.utils.grouping.Key TypeVar tries to generate this automatically.
     # Sphinx doesn't find it because the class is in _typeshed, which doesn't exist at runtime.
     # We link to _typeshed docs from the docstring anyway, so this is fine for the user.
@@ -247,8 +260,9 @@ nitpick_ignore = [
     # pydantic uses mkdocs, not Sphinx, and doesn't seem to have full API docs
     ("py:class", "pydantic.main.BaseModel"),
     # ray does have sphinx docs (at https://docs.ray.io/en/latest/ , but we don't need them for anything else)
-    # but it doesn't have a reference in its docs for ObjectRef (suprisingly)
+    # but it doesn't have a reference in its docs for a bunch of stuff (suprisingly)
     ("py:class", "ray._raylet.ObjectRef"),
+    ("py:class", "ray.util.queue.Queue"),
     # regex doesn't seem to have API docs at all
     ("py:class", "_regex.Pattern"),
     ("py:class", "urllib3.util.retry.Retry"),

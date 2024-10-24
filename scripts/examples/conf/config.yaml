@@ -1,0 +1,15 @@
+defaults:
+  - multilabel_ner_training: default
+  - annotate_with_llm: default
+  - _self_  # see https://hydra.cc/docs/1.2/upgrades/1.0_to_1.1/default_composition_order/
+
+# we set certain env vars here for things that are statically initialised
+hydra:
+  job:
+    env_set:
+      # Note that the cache_sizes config also modifies this env_set in order to
+      # set environment variables related to cache sizes.
+      # That config is in cache_sizes/default.yaml so that all cache size related config
+      #  can be in a single place for ease of discoverability and modification,
+      # whether it affects an environment variable or not.
+      TOKENIZERS_PARALLELISM: false # prevent rust tokenisers from forking
