@@ -15,6 +15,9 @@ from kazu.steps.other.cleanup import (
     CleanupStep,
     StripMappingURIsAction,
     DropMappingsByParserNameRankAction,
+    DropEntityIfClassNotMatchedFilter,
+    DropByMinLenFilter,
+    DropEntityIfMatchInSetFilter,
 )
 from kazu.utils.utils import Singleton
 
@@ -281,6 +284,122 @@ def test_drop_by_parser_name_rank():
             assert entity.mappings == {asthma_mapping_mondo}
         else:
             assert entity.mappings == {hsc0054_mapping_other_ont}
+
+
+def test_drop_by_min_len():
+    filter_func = DropByMinLenFilter(min_len=2)
+    long_ent = Entity.load_contiguous_entity(
+        start=0,
+        end=2,
+        match="lo",
+        entity_class="test",
+        namespace="test",
+        mappings=None,
+    )
+    assert not filter_func(long_ent)
+    short_ent = Entity.load_contiguous_entity(
+        start=0,
+        end=1,
+        match="l",
+        entity_class="test",
+        namespace="test",
+        mappings=None,
+    )
+    assert filter_func(short_ent)
+
+
+def test_drop_entity_if_class_not_matched():
+    filter_func = DropEntityIfClassNotMatchedFilter(required_classes=["required1", "required2"])
+    required_ents = [
+        Entity.load_contiguous_entity(
+            start=0,
+            end=2,
+            match="lo",
+            entity_class="required1",
+            namespace="test",
+            mappings=None,
+        ),
+        Entity.load_contiguous_entity(
+            start=0,
+            end=2,
+            match="lo",
+            entity_class="required2",
+            namespace="test",
+            mappings=None,
+        ),
+    ]
+    assert not any(filter_func(rec) for rec in required_ents)
+    discard_ents = [
+        Entity.load_contiguous_entity(
+            start=0,
+            end=2,
+            match="lo",
+            entity_class="discard1",
+            namespace="test",
+            mappings=None,
+        ),
+        Entity.load_contiguous_entity(
+            start=0,
+            end=2,
+            match="lo",
+            entity_class="discard2",
+            namespace="test",
+            mappings=None,
+        ),
+    ]
+    assert all(filter_func(rec) for rec in discard_ents)
+
+
+def test_drop_ent_if_match_in_set_filter():
+    filter_func = DropEntityIfMatchInSetFilter(
+        {"gene": ["abd", "def"], "disease": ["disease1", "disease1"]}
+    )
+    required_ents = [
+        Entity.load_contiguous_entity(
+            start=0,
+            end=2,
+            match="required",
+            entity_class="gene",
+            namespace="test",
+            mappings=None,
+        ),
+        Entity.load_contiguous_entity(
+            start=0,
+            end=2,
+            match="required2",
+            entity_class="disease",
+            namespace="test",
+            mappings=None,
+        ),
+        Entity.load_contiguous_entity(
+            start=0,
+            end=2,
+            match="required3",
+            entity_class="drug",
+            namespace="test",
+            mappings=None,
+        ),
+    ]
+    assert not any(filter_func(rec) for rec in required_ents)
+    discard_ents = [
+        Entity.load_contiguous_entity(
+            start=0,
+            end=2,
+            match="abd",
+            entity_class="gene",
+            namespace="test",
+            mappings=None,
+        ),
+        Entity.load_contiguous_entity(
+            start=0,
+            end=2,
+            match="disease1",
+            entity_class="disease",
+            namespace="test",
+            mappings=None,
+        ),
+    ]
+    assert all(filter_func(rec) for rec in discard_ents)
 
 
 def test_cleanup_step():
