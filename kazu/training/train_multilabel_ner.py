@@ -75,7 +75,7 @@ class LSManagerViewWrapper:
                 for ent in section.metadata.get("gold_entities", []):
                     if isinstance(ent, dict):
                         ent = Entity.from_dict(ent)
-                        gold_ents.append(ent)
+                    gold_ents.append(ent)
                 section.entities = gold_ents
             result.append([doc_cp, doc])
         return result
