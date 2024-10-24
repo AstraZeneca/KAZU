@@ -41,7 +41,6 @@ class TrainingConfig:
     device: str
     #: number of workers for dataloader
     workers: int
-    keys_to_use: list[str]
     #: architecture to use. Currently supports bert, deberta, distilbert
     architecture: str = "bert"
     #: fraction of epoch to complete before evaluations begin

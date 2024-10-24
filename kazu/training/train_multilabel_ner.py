@@ -306,7 +306,6 @@ class Trainer:
         working_dir: Path,
         summary_writer: Optional[SummaryWriter] = None,
         ls_wrapper: Optional[LSManagerViewWrapper] = None,
-        keys_to_use: Optional[list[str]] = None,
     ):
 
         self.ls_wrapper = ls_wrapper
@@ -320,9 +319,12 @@ class Trainer:
         self.test_dataset = test_dataset
         self.label_list = label_list
         self.pretrained_model_name_or_path = pretrained_model_name_or_path
-        self.keys_to_use = (
-            keys_to_use if keys_to_use else ["input_ids", "attention_mask", "token_type_ids"]
-        )
+        self.keys_to_use = self._select_keys_to_use()
+
+    def _select_keys_to_use(self) -> list[str]:
+        if self.training_config.architecture == "distilbert":
+            return ["input_ids", "attention_mask"]
+        return ["input_ids", "attention_mask", "token_type_ids"]
 
     def _write_to_tensorboard(
         self, global_step: int, main_tag: str, tag_scalar_dict: dict[str, NumericMetric]
