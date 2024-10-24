@@ -398,15 +398,17 @@ class Trainer:
             all_results[f"{clazz}_precision"] = result.precision
             all_results[f"{clazz}_recall"] = result.recall
             all_results[f"{clazz}_support"] = support
+            all_results["false_positives"] = {}
+            all_results["false_negatives"] = {}
 
             false_positives: defaultdict[str, dict[str, int]] = defaultdict(dict)
             for match, count in result.fp_info:
                 false_positives[clazz][match] = count
-            all_results["false_positives"] = dict(false_positives)
+            all_results["false_positives"].update(dict(false_positives))
             false_negatives: defaultdict[str, dict[str, int]] = defaultdict(dict)
             for match, count in result.fn_info:
                 false_negatives[clazz][match] = count
-            all_results["false_negatives"] = dict(false_negatives)
+            all_results["false_negatives"].update(dict(false_negatives))
         label_set = set(label_list)
         label_set.remove(ENTITY_OUTSIDE_SYMBOL)
         if len(ner_results) != len(label_set):
