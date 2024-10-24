@@ -1,0 +1,48 @@
+training_config:
+  _target_: kazu.training.config.TrainingConfig
+  hf_name: "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext"
+  cache_dir: ???
+  eval_path: ???
+  train_path: ???
+  training_data_cache_dir: ???
+  eval_data_cache_dir: ???
+  working_dir: ???
+  max_length: 512
+  use_cache: false
+  max_docs: ~
+  stride: 64
+  batch_size: 16
+  lr: 3e-5
+  evaluate_at_step_interval: 10
+  epoch_completion_fraction_before_evals: 0.01
+  num_epochs: 2
+  lr_scheduler_warmup_prop: 0.1
+  test_overfit: false
+  device: mps
+  architecture: bert
+  workers: 2
+css_colors:
+  - '#000000'  # Black
+  - '#FF0000'  # Red
+  - '#00FF00'  # Lime
+  - '#0000FF'  # Blue
+  - '#FFFF00'  # Yellow
+  - '#00FFFF'  # Cyan
+  - '#FF00FF'  # Magenta
+  - '#800000'  # Maroon
+  - '#808000'  # Olive
+  - '#008000'  # Green
+  - '#800080'  # Purple
+  - '#008080'  # Teal
+  - '#FFA500'  # Orange
+  - '#A52A2A'  # Brown
+  - '#8A2BE2'  # BlueViolet
+  - '#5F9EA0'  # CadetBlue
+  - '#D2691E'  # Chocolate
+  - '#000080'  # Navy
+  - '#FFDAB9'  # PeachPuff
+label_studio_manager:
+  _target_: kazu.annotation.label_studio.LabelStudioManager
+  project_name: "clean_data"
+  headers:
+    Authorization: ???
