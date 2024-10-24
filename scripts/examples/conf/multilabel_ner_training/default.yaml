@@ -13,7 +13,7 @@ training_config:
   batch_size: 16
   lr: 3e-5
   evaluate_at_step_interval: 10
-  epoch_completion_fraction_before_evals: 0.01
+  epoch_completion_fraction_before_evals: 0.75
   num_epochs: 2
   lr_scheduler_warmup_prop: 0.1
   test_overfit: false
