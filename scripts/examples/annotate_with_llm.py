@@ -226,7 +226,7 @@ class RayBatchRunner:
 
     def _instantiate_worker(self) -> ObjectRef:  # type: ignore[type-arg]
         PipelineQueueWorkerActor = ray.remote(RayPipelineQueueWorker)
-        PipelineQueueWorkerActor.options(num_cpus=1)  # type: ignore[attr-defined]
+        PipelineQueueWorkerActor.options(num_cpus=1)  # type: ignore[attr-defined,unused-ignore]
 
         worker: ObjectRef = PipelineQueueWorkerActor.remote(self.cfg)  # type: ignore[type-arg]
         worker.set_queues.remote(self.in_queue, self.out_queue)  # type: ignore[attr-defined]
