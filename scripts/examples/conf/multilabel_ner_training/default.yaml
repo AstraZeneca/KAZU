@@ -20,27 +20,31 @@ training_config:
   test_overfit: false
   device: mps
   architecture: bert
+  keys_to_use: #distilbert for token classification doesn't use token_type_ids
+    - input_ids
+    - attention_mask
+    - token_type_ids
   workers: 2
 css_colors:
-  - '#000000'  # Black
-  - '#FF0000'  # Red
-  - '#00FF00'  # Lime
-  - '#0000FF'  # Blue
-  - '#FFFF00'  # Yellow
-  - '#00FFFF'  # Cyan
-  - '#FF00FF'  # Magenta
-  - '#800000'  # Maroon
-  - '#808000'  # Olive
-  - '#008000'  # Green
-  - '#800080'  # Purple
-  - '#008080'  # Teal
-  - '#FFA500'  # Orange
-  - '#A52A2A'  # Brown
-  - '#8A2BE2'  # BlueViolet
-  - '#5F9EA0'  # CadetBlue
-  - '#D2691E'  # Chocolate
-  - '#000080'  # Navy
-  - '#FFDAB9'  # PeachPuff
+  - "#000000" # Black
+  - "#FF0000" # Red
+  - "#00FF00" # Lime
+  - "#0000FF" # Blue
+  - "#FFFF00" # Yellow
+  - "#00FFFF" # Cyan
+  - "#FF00FF" # Magenta
+  - "#800000" # Maroon
+  - "#808000" # Olive
+  - "#008000" # Green
+  - "#800080" # Purple
+  - "#008080" # Teal
+  - "#FFA500" # Orange
+  - "#A52A2A" # Brown
+  - "#8A2BE2" # BlueViolet
+  - "#5F9EA0" # CadetBlue
+  - "#D2691E" # Chocolate
+  - "#000080" # Navy
+  - "#FFDAB9" # PeachPuff
 label_studio_manager:
   _target_: kazu.annotation.label_studio.LabelStudioManager
   project_name: "clean_data"
