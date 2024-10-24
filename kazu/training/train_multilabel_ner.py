@@ -304,12 +304,10 @@ class Trainer:
         train_dataset: KazuMultiHotNerMultiLabelTrainingDataset,
         eval_dataset: KazuMultiHotNerMultiLabelTrainingDataset,
         working_dir: Path,
-        epoch_completion_fraction_before_evals: float = 0.75,
         summary_writer: Optional[SummaryWriter] = None,
         ls_wrapper: Optional[LSManagerViewWrapper] = None,
     ):
 
-        self.epoch_completion_fraction_before_evals = epoch_completion_fraction_before_evals
         self.ls_wrapper = ls_wrapper
         self.training_config = training_config
         self.summary_writer = summary_writer
@@ -529,7 +527,7 @@ class Trainer:
         steps_per_epoch = len(train_dataloader)
         num_training_steps = self.training_config.num_epochs * steps_per_epoch
         evals_begin_at_step = math.ceil(
-            steps_per_epoch * self.epoch_completion_fraction_before_evals
+            steps_per_epoch * self.training_config.epoch_completion_fraction_before_evals
         )
         progress_bar = tqdm(range(num_training_steps))
         if self.training_config.lr_scheduler_warmup_prop:
