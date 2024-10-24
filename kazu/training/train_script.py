@@ -70,15 +70,14 @@ def run(cfg: DictConfig) -> None:
     training_config: TrainingConfig = instantiate(cfg.multilabel_ner_training.training_config)
     print(os.environ)
     hf_name = training_config.hf_name
-    cache_dir = training_config.cache_dir
-    tokenizer = AutoTokenizer.from_pretrained(hf_name, cache_dir=cache_dir)
+    tokenizer = AutoTokenizer.from_pretrained(hf_name)
     output_dir = Path(hydra.core.hydra_config.HydraConfig.get().runtime.output_dir)
     tb_path = output_dir.joinpath("tensorboard")
     tb_path.mkdir(exist_ok=True)
     print(f'run tensorboard --logdir "{str(tb_path.absolute())}" to see training progress')
     training_data_cache_dir = Path(training_config.training_data_cache_dir)
     training_data_cache_dir.mkdir(exist_ok=True)
-    eval_data_cache_dir = Path(training_config.eval_data_cache_dir)
+    eval_data_cache_dir = Path(training_config.test_data_cache_dir)
     eval_data_cache_dir.mkdir(exist_ok=True)
     models_dir = output_dir.joinpath("models")
     models_dir.mkdir(exist_ok=True)
@@ -88,9 +87,9 @@ def run(cfg: DictConfig) -> None:
         train_doc_iter = test_doc_yielder()
         test_doc_iter = test_doc_yielder()
     else:
-        label_list = get_label_list(training_config.eval_path)
+        label_list = get_label_list(training_config.test_path)
         train_doc_iter = doc_yielder(training_config.train_path)
-        test_doc_iter = doc_yielder(training_config.eval_path)
+        test_doc_iter = doc_yielder(training_config.test_path)
     print(f"labels are :{label_list}")
 
     wrapper = create_wrapper(cfg.multilabel_ner_training, label_list)
@@ -105,7 +104,7 @@ def run(cfg: DictConfig) -> None:
         max_docs=training_config.max_docs,
         stride=training_config.stride,
     )
-    eval_ds = KazuMultiHotNerMultiLabelTrainingDataset(
+    test_ds = KazuMultiHotNerMultiLabelTrainingDataset(
         docs_iter=test_doc_iter,
         model_tokenizer=tokenizer,
         labels=label_list,
@@ -122,7 +121,7 @@ def run(cfg: DictConfig) -> None:
         pretrained_model_name_or_path=hf_name,
         label_list=label_list,
         train_dataset=train_ds,
-        eval_dataset=eval_ds,
+        test_dataset=test_ds,
         working_dir=output_dir,
         summary_writer=SummaryWriter(log_dir=str(tb_path.absolute())),
         ls_wrapper=wrapper,
