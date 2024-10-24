@@ -125,7 +125,6 @@ def run(cfg: DictConfig) -> None:
         working_dir=output_dir,
         summary_writer=SummaryWriter(log_dir=str(tb_path.absolute())),
         ls_wrapper=wrapper,
-        keys_to_use=training_config.keys_to_use,
     )
     trainer.train_model()
 
