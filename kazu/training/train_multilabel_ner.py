@@ -80,15 +80,15 @@ class LSManagerViewWrapper:
             result.append([doc_cp, doc])
         return result
 
-    def update(self, eval_docs: list[Document], global_step: int, has_gs: bool = True) -> None:
+    def update(self, test_docs: list[Document], global_step: int, has_gs: bool = True) -> None:
         ls_manager = LabelStudioManager(
             headers=self.ls_manager.headers,
-            project_name=f"{self.ls_manager.project_name}_eval_{global_step}",
+            project_name=f"{self.ls_manager.project_name}_test_{global_step}",
         )
 
         ls_manager.delete_project_if_exists()
         ls_manager.create_linking_project()
-        docs_subset = random.sample(eval_docs, min([len(eval_docs), 100]))
+        docs_subset = random.sample(test_docs, min([len(test_docs), 100]))
         if not docs_subset:
             logger.info("no results to represent yet")
             return
@@ -130,7 +130,7 @@ class ModelSaver:
         tokenizer: PreTrainedTokenizerFast,
         metrics: dict[str, float],
         stopping_metric: str,
-        eval_docs: Optional[list[Document]] = None,
+        test_docs: Optional[list[Document]] = None,
     ) -> None:
         self.patience_check_count += 1
         save_dir = self.save_dir.joinpath(f"step_{step}")
@@ -145,8 +145,8 @@ class ModelSaver:
         self.save_model(tokenizer, model, save_dir)
         with save_dir.joinpath("metrics.json").open(mode="w") as f:
             json.dump(metrics, f, indent=2, sort_keys=True)
-        if eval_docs:
-            self._save_eval_docs(eval_docs, save_dir)
+        if test_docs:
+            self._save_test_docs(test_docs, save_dir)
 
         self.saves.append(saved_model)
         if len(self.saves) > self.max_to_keep:
@@ -161,11 +161,11 @@ class ModelSaver:
             shutil.move(self.best.path, best_path)
             raise RuntimeError(f"patience exceeded, best model moved to {best_path}")
 
-    def _save_eval_docs(self, eval_docs: list[Document], save_dir: Path) -> None:
-        eval_docs_dir = save_dir.joinpath("eval_docs")
-        eval_docs_dir.mkdir(exist_ok=True)
-        for doc in eval_docs:
-            with eval_docs_dir.joinpath(f"{doc.idx}.json").open(mode="w") as f:
+    def _save_test_docs(self, test_docs: list[Document], save_dir: Path) -> None:
+        test_docs_dir = save_dir.joinpath("test_docs")
+        test_docs_dir.mkdir(exist_ok=True)
+        for doc in test_docs:
+            with test_docs_dir.joinpath(f"{doc.idx}.json").open(mode="w") as f:
                 f.write(doc.to_json())
 
 
@@ -302,7 +302,7 @@ class Trainer:
         pretrained_model_name_or_path: str,
         label_list: list[str],
         train_dataset: KazuMultiHotNerMultiLabelTrainingDataset,
-        eval_dataset: KazuMultiHotNerMultiLabelTrainingDataset,
+        test_dataset: KazuMultiHotNerMultiLabelTrainingDataset,
         working_dir: Path,
         summary_writer: Optional[SummaryWriter] = None,
         ls_wrapper: Optional[LSManagerViewWrapper] = None,
@@ -316,10 +316,8 @@ class Trainer:
         model_save_dir = working_dir.joinpath("models")
         model_save_dir.mkdir(exist_ok=True)
         self.saver = ModelSaver(save_dir=model_save_dir, max_to_keep=5)
-        self.eval_dir = self.working_dir.joinpath("eval_tmp")
-        self.eval_dir.mkdir(exist_ok=True)
         self.train_dataset = train_dataset
-        self.eval_dataset = eval_dataset
+        self.test_dataset = test_dataset
         self.label_list = label_list
         self.pretrained_model_name_or_path = pretrained_model_name_or_path
         self.keys_to_use = (
@@ -337,21 +335,21 @@ class Trainer:
     def evaluate_model(
         self, model: PreTrainedModel, global_step: int, save_model: bool = True
     ) -> None:
-        eval_dataloader = DataLoader(
-            self.eval_dataset,
+        test_dataloader = DataLoader(
+            self.test_dataset,
             batch_size=self.training_config.batch_size,
             shuffle=False,
             num_workers=self.training_config.workers,
             pin_memory=True,
         )
-        epoch_loss = self._log_eval_loss(eval_dataloader, global_step, model)
+        epoch_loss = self._log_test_loss(test_dataloader, global_step, model)
 
-        model_eval_docs = self._process_docs(model)
+        model_test_docs = self._process_docs(model)
         if self.ls_wrapper:
-            self.ls_wrapper.update(model_eval_docs, global_step)
+            self.ls_wrapper.update(model_test_docs, global_step)
 
         all_results, tensorboad_loggables = self.calculate_metrics(
-            epoch_loss, model_eval_docs, self.label_list
+            epoch_loss, model_test_docs, self.label_list
         )
         if self.summary_writer:
             self.log_metrics(tensorboad_loggables, global_step)
@@ -362,7 +360,7 @@ class Trainer:
                 self.train_dataset.model_tokenizer,
                 metrics=all_results,
                 stopping_metric="mean_f1",
-                eval_docs=model_eval_docs,
+                test_docs=model_test_docs,
             )
 
     def log_metrics(
@@ -374,13 +372,13 @@ class Trainer:
 
     @staticmethod
     def calculate_metrics(
-        epoch_loss: float, eval_docs: list[Document], label_list: list[str]
+        epoch_loss: float, test_docs: list[Document], label_list: list[str]
     ) -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:
-        for doc in eval_docs:
+        for doc in test_docs:
             if PROCESSING_EXCEPTION in doc.metadata:
                 logger.error(doc.metadata[PROCESSING_EXCEPTION])
                 break
-        ner_dict = score_sections(eval_docs)
+        ner_dict = score_sections(test_docs)
         ner_results = aggregate_ner_results(ner_dict)
         all_results: dict[str, Any] = {}
         tensorboard_loggables = {}
@@ -425,10 +423,10 @@ class Trainer:
                     ]
                 ) / len(ner_results)
             except ZeroDivisionError:
-                logger.info("model not considered as some eval values are 0")
+                logger.info("model not considered as some test values are 0")
                 mean_f1 = 0.0
-        all_results["eval_loss"] = epoch_loss
-        tensorboard_loggables["loss"] = {"eval_loss": epoch_loss}
+        all_results["test_loss"] = epoch_loss
+        tensorboard_loggables["loss"] = {"test_loss": epoch_loss}
         all_results["mean_f1"] = mean_f1
         tensorboard_loggables["mean_f1"] = {"f1": mean_f1}
         return all_results, tensorboard_loggables
@@ -449,31 +447,31 @@ class Trainer:
                 device=self.training_config.device,
             )
 
-            eval_docs = self._process_docs_with_kazu_step(step)
-        return eval_docs
+            test_docs = self._process_docs_with_kazu_step(step)
+        return test_docs
 
     def _process_docs_with_kazu_step(
         self, step: TransformersModelForTokenClassificationNerStep
     ) -> list[Document]:
-        eval_pipeline = Pipeline(steps=[step])
-        docs = self.eval_dataset.get_docs_copy()
+        test_pipeline = Pipeline(steps=[step])
+        docs = self.test_dataset.get_docs_copy()
 
         for doc_sub in chunks(docs, 10):
-            eval_pipeline(doc_sub)
+            test_pipeline(doc_sub)
         return docs
 
-    def _log_eval_loss(
+    def _log_test_loss(
         self,
-        eval_dataloader: DataLoader[dict[str, Tensor]],
+        test_dataloader: DataLoader[dict[str, Tensor]],
         global_step: int,
         model: PreTrainedModel,
     ) -> float:
         model.eval()
-        total_eval_loss = 0.0
+        total_test_loss = 0.0
         loss_func = torch.nn.BCEWithLogitsLoss()
-        for batch in eval_dataloader:
+        for batch in test_dataloader:
             with torch.no_grad():
-                # must pop labels for eval
+                # must pop labels for test
                 labels = batch.pop("labels")
                 batch.pop("overflow_to_sample_mapping")
                 batch = {k: v.to(self.training_config.device) for k, v in batch.items()}
@@ -482,10 +480,10 @@ class Trainer:
                 flat_outputs = outputs.logits.squeeze()[ignore_index != -100]
                 flat_labels = labels.squeeze()[ignore_index != -100].to(self.training_config.device)
                 loss = loss_func(flat_outputs, flat_labels)
-                total_eval_loss += loss.item() * labels.size(0)
-        epoch_loss = total_eval_loss / len(eval_dataloader)
-        logger.info(f"evaluation loss: {epoch_loss}")
-        self._write_to_tensorboard(global_step, "epoch_loss", {"eval_loss": epoch_loss})
+                total_test_loss += loss.item() * labels.size(0)
+        epoch_loss = total_test_loss / len(test_dataloader)
+        logger.info(f"test loss: {epoch_loss}")
+        self._write_to_tensorboard(global_step, "epoch_loss", {"test_loss": epoch_loss})
         return epoch_loss
 
     def train_model(self) -> None:
@@ -551,7 +549,7 @@ class Trainer:
         model.to(device)
         batch_count = 0
         global_step = 0
-        logger.info(f"will evaluate after {evals_begin_at_step} steps")
+        logger.info(f"will evaluate after {max([evals_begin_at_step,warmup_steps])} steps")
         for epoch in range(self.training_config.num_epochs):
             model.train()
             running_loss = 0.0
