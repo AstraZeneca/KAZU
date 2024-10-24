@@ -21,6 +21,7 @@ Welcome to Kazu's documentation!
    The Kazu Resource Tool <kazu_resource_tool>
    Curating a knowledge base for NER and Linking <curating_a_knowledgebase>
    Scaling with Ray <scaling_kazu>
+   Building a multilabel NER model with Kazu <training_multilabel_ner>
    Kazu as a WebService <kazu_webservice>
    Using Kazu as a library <kazu_as_a_library>
    Development Setup <development_setup>
