@@ -1,0 +1,196 @@
+_convert_: "all"
+pipeline:
+  _target_: kazu.pipeline.Pipeline
+  steps:
+    - _target_: kazu.steps.ner.llm_ner.LLMNERStep
+      result_parser:
+        _target_: kazu.steps.ner.llm_ner.StructuredOutputResultParser
+      section_processing_strategy:
+        _target_: kazu.steps.ner.llm_ner.SectionProcessingStrategy
+        _args_:
+          - PROCESS_INDIVIDUALLY_AND_DROP_FAILED_SECTIONS
+      model:
+        _target_: kazu.steps.ner.llm_ner.VertexLLMModel
+        project: ???
+        prompt: |
+          You are a systems biology expert. Your task is to extract biologically relevant noun phrases from biomedical literature, and identify the entity class and top level category for each.
+          You may choose any string for the entity class that is appropriate, but the top level category MUST be chosen from the below list:
+
+          species
+          organization
+          gene or gene product
+          place
+          drug
+          treatment
+          diagnostic
+          method
+          instrument
+          chemical
+          measurement
+          cellular component
+          biological process
+          cell type
+          protein domain or region
+          anatomical part or tissue
+          mutation
+          disease, disorder, phenotype or trait
+          clinical trial endpoint
+          other
+        model: gemini-1.5-flash-002
+        generation_config:
+          _target_: vertexai.generative_models.GenerationConfig
+          max_output_tokens: 8192
+          temperature: 0.3
+          top_p: 0.95
+          response_mime_type: application/json
+          response_schema:
+            type: array
+            items:
+              type: object
+              properties:
+                entity_class:
+                  type: string
+                top_level_category:
+                  type: string
+                entity_match:
+                  type: string
+              required:
+                - entity_match
+                - entity_class
+                - top_level_category
+        location: ???
+    - _target_: kazu.steps.other.cleanup.CleanupStep
+      cleanup_actions:
+        - _target_: kazu.steps.other.cleanup.EntityFilterCleanupAction
+          filter_fns:
+            - _target_: kazu.steps.other.cleanup.DropEntityIfClassNotMatchedFilter
+              required_classes:
+                - species
+                - organization
+                - gene or gene product
+                - place
+                - drug
+                - treatment
+                - diagnostic
+                - method
+                - instrument
+                - chemical
+                - measurement
+                - cellular component
+                - biological process
+                - cell type
+                - protein domain or region
+                - anatomical part or tissue
+                - mutation
+                - disease, disorder, phenotype or trait
+            - _target_: kazu.steps.other.cleanup.DropEntityIfMatchInSetFilter
+              drop_dict:
+                species:
+                  - species
+                  - host
+                organization:
+                  - has
+                gene or gene product:
+                  - genes
+                  - proteins
+                  - gene
+                  - protein
+                  - genome
+                  - antibodies
+                  - genome
+                  - ccres
+                  - rna
+                  - dna
+                treatment:
+                  - treatment
+                  - therapy
+                  - vaccine
+                  - drug
+                  - drugs
+                  - antibiotics
+                  - water-exposed
+                  - antibiotic
+                  - control
+                method:
+                  - methods
+                  - analysis
+                  - control
+                  - if
+                  - magical
+                chemical:
+                  - dna
+                  - rna
+                  - metabolites
+                  - residues
+                  - compounds
+                  - protein
+                measurement:
+                  - bold
+                  - at
+                cellular component:
+                  - cells
+                  - cell
+                  - surface
+                  - neurons
+                  - residues
+                  - genomes
+                  - genome
+                biological process:
+                  - movement
+                  - spatial working memory
+                  - pan-proteome
+                  - cancer vaccine
+                  - moves along an irregular helical path
+                  - re-encoding of traumatic memories
+                  - production cycles
+                  - general health of the birds
+                  - neurodevelopmental time series
+                cell type:
+                  - cells
+                  - cell
+                  - cell types
+                  - patients
+                  - strains
+                  - males
+                  - cell type
+                  - parasite
+                  - cell lines
+                  - in
+                protein domain or region:
+                  - domains
+                  - proteins
+                  - domain
+                  - binding
+                  - motifs
+                  - motif
+                  - network
+                  - binding sites
+                  - seed
+                mutation:
+                  - mutations
+                  - variants
+                  - mutants
+                  - snps
+                  - variant
+                  - tko
+                  - mutation
+                  - snp
+                  - mutant
+                  - de novo
+                  - isoforms
+                  - variations
+                  - cnvs
+                disease, disorder, phenotype or trait:
+                  - disease
+                  - is
+            - _target_: kazu.steps.other.cleanup.DropByMinLenFilter
+              min_len: 2
+  failure_handler:
+    - _target_: kazu.pipeline.FailedDocsLogHandler
+worker_count: 2
+ParquetDocumentLoader:
+  _target_: __main__.ParquetDocumentLoader
+  source_dir: ???
+  batch_size: 1
+out_dir: ???
+failed_dir: ???
