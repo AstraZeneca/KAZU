@@ -19,10 +19,6 @@ training_config:
   test_overfit: false
   device: mps
   architecture: bert
-  keys_to_use: #distilbert for token classification doesn't use token_type_ids
-    - input_ids
-    - attention_mask
-    - token_type_ids
   workers: 2
 css_colors:
   - "#000000" # Black
