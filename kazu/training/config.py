@@ -24,5 +24,6 @@ class TrainingConfig:
     test_overfit: bool
     device: str
     workers: int
+    keys_to_use: list[str]
     architecture: str = "bert"
     epoch_completion_fraction_before_evals: float = 0.75

@@ -306,6 +306,7 @@ class Trainer:
         working_dir: Path,
         summary_writer: Optional[SummaryWriter] = None,
         ls_wrapper: Optional[LSManagerViewWrapper] = None,
+        keys_to_use: Optional[list[str]] = None,
     ):
 
         self.ls_wrapper = ls_wrapper
@@ -321,6 +322,9 @@ class Trainer:
         self.eval_dataset = eval_dataset
         self.label_list = label_list
         self.pretrained_model_name_or_path = pretrained_model_name_or_path
+        self.keys_to_use = (
+            keys_to_use if keys_to_use else ["input_ids", "attention_mask", "token_type_ids"]
+        )
 
     def _write_to_tensorboard(
         self, global_step: int, main_tag: str, tag_scalar_dict: dict[str, NumericMetric]
@@ -441,7 +445,7 @@ class Trainer:
                 tokenized_word_processor=TokenizedWordProcessor(
                     labels=self.label_list, use_multilabel=True
                 ),
-                keys_to_use=["input_ids", "attention_mask", "token_type_ids"],
+                keys_to_use=self.keys_to_use,
                 device=self.training_config.device,
             )
 
