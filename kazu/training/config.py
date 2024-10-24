@@ -25,3 +25,4 @@ class TrainingConfig:
     device: str
     workers: int
     architecture: str = "bert"
+    epoch_completion_fraction_before_evals: float = 0.75
