@@ -1,11 +1,10 @@
 training_config:
   _target_: kazu.training.config.TrainingConfig
   hf_name: "microsoft/BiomedNLP-BiomedBERT-base-uncased-abstract-fulltext"
-  cache_dir: ???
-  eval_path: ???
+  test_path: ???
   train_path: ???
   training_data_cache_dir: ???
-  eval_data_cache_dir: ???
+  test_data_cache_dir: ???
   working_dir: ???
   max_length: 512
   use_cache: false
