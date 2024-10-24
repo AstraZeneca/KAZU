@@ -54,12 +54,6 @@ def test_doc_yielder() -> Iterable[Document]:
     yield doc
 
 
-if os.getenv("KAZU_MODEL_PACK"):
-    config_path = str(Path(str(os.getenv("KAZU_MODEL_PACK"))).joinpath("conf"))
-else:
-    raise ValueError("KAZU_MODEL_PACK not set")
-
-
 def create_view_for_labels(
     label_list: list[str], css_colors: list[str]
 ) -> LabelStudioAnnotationView:
@@ -71,9 +65,9 @@ def create_view_for_labels(
     return view
 
 
-@hydra.main(version_base=HYDRA_VERSION_BASE, config_path=config_path, config_name="config")
+@hydra.main(version_base=HYDRA_VERSION_BASE, config_path="conf", config_name="config")
 def run(cfg: DictConfig) -> None:
-    training_config: TrainingConfig = instantiate(cfg.training)
+    training_config: TrainingConfig = instantiate(cfg.multilabel_ner_training.training_config)
     print(os.environ)
     hf_name = training_config.hf_name
     cache_dir = training_config.cache_dir
@@ -99,7 +93,7 @@ def run(cfg: DictConfig) -> None:
         test_doc_iter = doc_yielder(training_config.eval_path)
     print(f"labels are :{label_list}")
 
-    wrapper = create_wrapper(cfg, label_list)
+    wrapper = create_wrapper(cfg.multilabel_ner_training, label_list)
 
     train_ds = KazuMultiHotNerMultiLabelTrainingDataset(
         docs_iter=train_doc_iter,
@@ -116,10 +110,10 @@ def run(cfg: DictConfig) -> None:
         model_tokenizer=tokenizer,
         labels=label_list,
         tmp_dir=eval_data_cache_dir,
-        max_length=cfg.training.max_length,
-        use_cache=cfg.training.use_cache,
+        max_length=training_config.max_length,
+        use_cache=training_config.use_cache,
         max_docs=None,
-        stride=cfg.training.stride,
+        stride=training_config.stride,
         keep_doc_reference=True,
     )
 
@@ -137,9 +131,9 @@ def run(cfg: DictConfig) -> None:
 
 
 def create_wrapper(cfg: DictConfig, label_list: list[str]) -> Optional[LSManagerViewWrapper]:
-    if cfg.training.get("label_studio_manager"):
-        ls_manager: LabelStudioManager = instantiate(cfg.training.label_studio_manager)
-        css_colors = cfg.training.css_colors
+    if cfg.get("label_studio_manager"):
+        ls_manager: LabelStudioManager = instantiate(cfg.label_studio_manager)
+        css_colors = cfg.css_colors
         label_to_color = {}
         for i, label in enumerate(label_list):
             label_to_color[label] = css_colors[i]
@@ -152,7 +146,6 @@ def create_wrapper(cfg: DictConfig, label_list: list[str]) -> Optional[LSManager
 def get_label_list(path: PathLike) -> list[str]:
     label_list = set()
     for doc in doc_yielder(path):
-        # TODO clean data as LLM is a bit weird!
         for entity in doc.get_entities():
             label_list.add(entity.entity_class)
     label_list.add(ENTITY_OUTSIDE_SYMBOL)
