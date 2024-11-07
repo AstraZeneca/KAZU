@@ -45,3 +45,19 @@ class TrainingConfig:
     architecture: str = "bert"
     #: fraction of epoch to complete before evaluations begin
     epoch_completion_fraction_before_evals: float = 0.75
+
+
+@dataclass
+class PredictionConfig:
+    #: path to the trained model
+    path: Path
+    #: batch size
+    batch_size: int
+    #: stride for splitting documents into training instances (see HF tokenizers)
+    stride: int
+    #: max sequence length per training instance
+    max_sequence_length: int
+    #: device to train on
+    device: str
+    #: architecture to use. Currently supports bert, deberta, distilbert
+    architecture: str = "bert"
