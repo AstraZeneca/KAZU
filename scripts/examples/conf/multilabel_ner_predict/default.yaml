@@ -26,7 +26,7 @@ label_list:
   ]
 prediction_config:
   _target_: kazu.training.config.PredictionConfig
-  path: training/models/biomedNLP_1
+  path: ???
   batch_size: 1
   stride: 64
   max_sequence_length: 512
@@ -56,4 +56,4 @@ label_studio_manager:
   _target_: kazu.annotation.label_studio.LabelStudioManager
   project_name: "clean_data"
   headers:
-    Authorization: ~
+    Authorization: ???
