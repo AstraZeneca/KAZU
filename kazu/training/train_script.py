@@ -13,15 +13,15 @@ from kazu.annotation.label_studio import (
     LabelStudioAnnotationView,
     LabelStudioManager,
 )
-from kazu.utils.utils import PathLike
-from kazu.utils.constants import HYDRA_VERSION_BASE
-from kazu.data import Document, Section, Entity, ENTITY_OUTSIDE_SYMBOL
+from kazu.data import ENTITY_OUTSIDE_SYMBOL, Document, Entity, Section
 from kazu.training.config import TrainingConfig
 from kazu.training.train_multilabel_ner import (
-    Trainer,
     KazuMultiHotNerMultiLabelTrainingDataset,
     LSManagerViewWrapper,
+    Trainer,
 )
+from kazu.utils.constants import HYDRA_VERSION_BASE
+from kazu.utils.utils import PathLike
 
 
 def doc_yielder(path: PathLike) -> Iterable[Document]:
@@ -130,7 +130,7 @@ def run(cfg: DictConfig) -> None:
 
 
 def create_wrapper(cfg: DictConfig, label_list: list[str]) -> Optional[LSManagerViewWrapper]:
-    if cfg.get("label_studio_manager"):
+    if cfg.get("label_studio_manager") and cfg.get("css_colors"):
         ls_manager: LabelStudioManager = instantiate(cfg.label_studio_manager)
         css_colors = cfg.css_colors
         label_to_color = {}
@@ -138,8 +138,7 @@ def create_wrapper(cfg: DictConfig, label_list: list[str]) -> Optional[LSManager
             label_to_color[label] = css_colors[i]
         view = LabelStudioAnnotationView(ner_labels=label_to_color)
         return LSManagerViewWrapper(view, ls_manager)
-    else:
-        return None
+    return None
 
 
 def get_label_list(path: PathLike) -> list[str]:

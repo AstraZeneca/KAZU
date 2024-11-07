@@ -2,6 +2,7 @@ import copy
 import dataclasses
 import json
 import logging
+import math
 import pickle
 import random
 import shutil
@@ -9,45 +10,43 @@ import tempfile
 from collections import defaultdict
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Optional, Any, Union, cast
-import math
+from typing import Any, Optional, Union, cast
 
 import torch
-from kazu.annotation.label_studio import LabelStudioManager, LabelStudioAnnotationView
-from kazu.annotation.acceptance_test import score_sections, aggregate_ner_results
+from torch import Tensor
+from torch.optim import AdamW
+from torch.utils.data import DataLoader, Dataset
+from torch.utils.tensorboard import SummaryWriter
+from tqdm import tqdm
+from transformers import (
+    BatchEncoding,
+    PreTrainedModel,
+    PreTrainedTokenizerFast,
+    SchedulerType,
+    get_scheduler,
+)
+
+from kazu.annotation.acceptance_test import aggregate_ner_results, score_sections
+from kazu.annotation.label_studio import LabelStudioAnnotationView, LabelStudioManager
 from kazu.data import (
-    Section,
-    Document,
-    PROCESSING_EXCEPTION,
     ENTITY_OUTSIDE_SYMBOL,
-    NumericMetric,
+    PROCESSING_EXCEPTION,
+    Document,
     Entity,
+    NumericMetric,
+    Section,
 )
 from kazu.pipeline import Pipeline
 from kazu.steps.ner.hf_token_classification import (
     TransformersModelForTokenClassificationNerStep,
 )
 from kazu.steps.ner.tokenized_word_processor import TokenizedWordProcessor
+from kazu.training.config import TrainingConfig
 from kazu.training.modelling import (
-    DistilBertForMultiLabelTokenClassification,
     BertForMultiLabelTokenClassification,
     DebertaForMultiLabelTokenClassification,
+    DistilBertForMultiLabelTokenClassification,
 )
-from torch import Tensor
-from torch.optim import AdamW
-from torch.utils.data import DataLoader
-from torch.utils.data import Dataset
-from torch.utils.tensorboard import SummaryWriter
-from tqdm import tqdm
-from transformers import (
-    PreTrainedTokenizerFast,
-    BatchEncoding,
-    PreTrainedModel,
-    get_scheduler,
-    SchedulerType,
-)
-
-from kazu.training.config import TrainingConfig
 
 logger = logging.getLogger(__name__)
 
@@ -295,6 +294,12 @@ def move_entities_to_metadata(docs: list[Document]) -> list[Document]:
     return docs
 
 
+def _select_keys_to_use(architecture: str) -> list[str]:
+    if architecture == "distilbert":
+        return ["input_ids", "attention_mask"]
+    return ["input_ids", "attention_mask", "token_type_ids"]
+
+
 class Trainer:
     def __init__(
         self,
@@ -319,12 +324,7 @@ class Trainer:
         self.test_dataset = test_dataset
         self.label_list = label_list
         self.pretrained_model_name_or_path = pretrained_model_name_or_path
-        self.keys_to_use = self._select_keys_to_use()
-
-    def _select_keys_to_use(self) -> list[str]:
-        if self.training_config.architecture == "distilbert":
-            return ["input_ids", "attention_mask"]
-        return ["input_ids", "attention_mask", "token_type_ids"]
+        self.keys_to_use = _select_keys_to_use(self.training_config.architecture)
 
     def _write_to_tensorboard(
         self, global_step: int, main_tag: str, tag_scalar_dict: dict[str, NumericMetric]
