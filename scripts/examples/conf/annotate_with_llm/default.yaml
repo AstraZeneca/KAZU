@@ -59,7 +59,7 @@ pipeline:
                 - entity_match
                 - entity_class
                 - top_level_category
-        location: ???
+        location: us-central1
     - _target_: kazu.steps.other.cleanup.CleanupStep
       cleanup_actions:
         - _target_: kazu.steps.other.cleanup.EntityFilterCleanupAction
@@ -188,10 +188,8 @@ pipeline:
               min_len: 2
   failure_handler:
     - _target_: kazu.pipeline.FailedDocsLogHandler
+batch_size: 4
 worker_count: 2
-ParquetDocumentLoader:
-  _target_: __main__.ParquetDocumentLoader
-  source_dir: ???
-  batch_size: 1
+source_dir: ???
 out_dir: ???
 failed_dir: ???

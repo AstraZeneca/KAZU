@@ -1,7 +1,8 @@
 defaults:
   - multilabel_ner_training: default
   - annotate_with_llm: default
-  - _self_  # see https://hydra.cc/docs/1.2/upgrades/1.0_to_1.1/default_composition_order/
+  - convert_parquet_to_kazu_docs: default
+  - _self_ # see https://hydra.cc/docs/1.2/upgrades/1.0_to_1.1/default_composition_order/
 
 # we set certain env vars here for things that are statically initialised
 hydra:
