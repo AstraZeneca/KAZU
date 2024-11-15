@@ -1,6 +1,6 @@
 _convert_: "all"
 ParquetDocumentLoader:
   _target_: __main__.ParquetDocumentLoader
-  source_dir: /Users/krmr097/code/KAZU/training/raw/percentile=1
+  source_dir: ???
   batch_size: 1
-out_dir: /Users/krmr097/code/KAZU/training/kazu_docs
+out_dir: ???
