@@ -1,16 +1,24 @@
 import json
 import logging
 from enum import auto
-from typing import Iterable, Optional, Any, cast, Protocol
+from typing import Any, Iterable, Optional, Protocol, cast
 
 import ahocorasick
 import vertexai
-from kazu.data import Document, Entity, Section, MentionConfidence, AutoNameEnum
-from kazu.steps import Step, document_iterating_step
-from kazu.utils.spacy_pipeline import BASIC_PIPELINE_NAME, SpacyPipelines, basic_spacy_pipeline
-from kazu.utils.utils import word_is_valid
 from vertexai.generative_models import SafetySetting
-from vertexai.generative_models._generative_models import SafetySettingsType, GenerativeModel
+from vertexai.generative_models._generative_models import (
+    GenerativeModel,
+    SafetySettingsType,
+)
+
+from kazu.data import AutoNameEnum, Document, Entity, MentionConfidence, Section
+from kazu.steps import Step, document_iterating_step
+from kazu.utils.spacy_pipeline import (
+    BASIC_PIPELINE_NAME,
+    SpacyPipelines,
+    basic_spacy_pipeline,
+)
+from kazu.utils.utils import word_is_valid
 
 logger = logging.getLogger(__name__)
 
