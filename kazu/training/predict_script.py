@@ -1,7 +1,6 @@
 """Use this script to test the model with custom text inputs and visualize the
 predictions in Label Studio."""
 
-import json
 from pathlib import Path
 
 import hydra
@@ -15,8 +14,8 @@ from kazu.steps.ner.hf_token_classification import (
 )
 from kazu.steps.ner.tokenized_word_processor import TokenizedWordProcessor
 from kazu.training.config import PredictionConfig
+from kazu.training.modelling_utils import create_wrapper, get_label_list_from_model
 from kazu.training.train_multilabel_ner import _select_keys_to_use
-from kazu.training.train_script import create_wrapper
 from kazu.utils.constants import HYDRA_VERSION_BASE
 
 
@@ -30,10 +29,7 @@ from kazu.utils.constants import HYDRA_VERSION_BASE
 def main(cfg: DictConfig) -> None:
     prediction_config: PredictionConfig = instantiate(cfg.prediction_config)
 
-    with open(Path(prediction_config.path) / "config.json", "r") as file:
-        model_config = json.load(file)
-        id2label = {int(idx): label for idx, label in model_config["id2label"].items()}
-        label_list = [label for _, label in sorted(id2label.items())]
+    label_list = get_label_list_from_model(Path(prediction_config.path) / "config.json")
     print(f"There are {len(label_list)} labels.")
 
     step = TransformersModelForTokenClassificationNerStep(
@@ -51,7 +47,7 @@ def main(cfg: DictConfig) -> None:
 
     manager = create_wrapper(cfg, label_list)
     if manager is not None:
-        manager.update(documents, 0, has_gs=False)
+        manager.update(documents, "custom_predictions", has_gs=False)
 
 
 if __name__ == "__main__":
