@@ -17,12 +17,16 @@ from kazu.steps.ner.hf_token_classification import (
 )
 from kazu.steps.ner.tokenized_word_processor import TokenizedWordProcessor
 from kazu.training.config import PredictionConfig
+from kazu.training.modelling_utils import (
+    create_wrapper,
+    doc_yielder,
+    get_label_list_from_model,
+)
 from kazu.training.train_multilabel_ner import (
     _select_keys_to_use,
     calculate_metrics,
     move_entities_to_metadata,
 )
-from kazu.training.train_script import create_wrapper, doc_yielder
 from kazu.utils.constants import HYDRA_VERSION_BASE
 
 
@@ -36,10 +40,7 @@ from kazu.utils.constants import HYDRA_VERSION_BASE
 def main(cfg: DictConfig) -> None:
     prediction_config: PredictionConfig = instantiate(cfg.prediction_config)
 
-    with open(Path(prediction_config.path) / "config.json", "r") as file:
-        model_config = json.load(file)
-        id2label = {int(idx): label for idx, label in model_config["id2label"].items()}
-        label_list = [label for _, label in sorted(id2label.items())]
+    label_list = get_label_list_from_model(Path(prediction_config.path) / "config.json")
     print(f"There are {len(label_list)} labels.")
 
     step = TransformersModelForTokenClassificationNerStep(
