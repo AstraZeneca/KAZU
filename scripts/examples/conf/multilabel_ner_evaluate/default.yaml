@@ -1,0 +1,35 @@
+test_data: /Users/krmr097/code/KAZU/training/splits/test
+prediction_config:
+  _target_: kazu.training.config.PredictionConfig
+  path: ???
+  batch_size: 1
+  stride: 64
+  max_sequence_length: 512
+  device: cpu
+  architecture: bert
+  use_multilabel: true
+css_colors:
+  - "#000000" # Black
+  - "#FF0000" # Red
+  - "#00FF00" # Lime
+  - "#0000FF" # Blue
+  - "#FFFF00" # Yellow
+  - "#00FFFF" # Cyan
+  - "#FF00FF" # Magenta
+  - "#800000" # Maroon
+  - "#808000" # Olive
+  - "#008000" # Green
+  - "#800080" # Purple
+  - "#008080" # Teal
+  - "#FFA500" # Orange
+  - "#A52A2A" # Brown
+  - "#8A2BE2" # BlueViolet
+  - "#5F9EA0" # CadetBlue
+  - "#D2691E" # Chocolate
+  - "#000080" # Navy
+  - "#FFDAB9" # PeachPuff
+label_studio_manager:
+  _target_: kazu.annotation.label_studio.LabelStudioManager
+  project_name: "clean_data"
+  headers:
+    Authorization: ???
