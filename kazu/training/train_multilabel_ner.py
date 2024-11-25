@@ -79,7 +79,9 @@ class LSManagerViewWrapper:
             result.append([doc_cp, doc])
         return result
 
-    def update(self, test_docs: list[Document], global_step: int, has_gs: bool = True) -> None:
+    def update(
+        self, test_docs: list[Document], global_step: Union[int, str], has_gs: bool = True
+    ) -> None:
         ls_manager = LabelStudioManager(
             headers=self.ls_manager.headers,
             project_name=f"{self.ls_manager.project_name}_test_{global_step}",
@@ -300,6 +302,69 @@ def _select_keys_to_use(architecture: str) -> list[str]:
     return ["input_ids", "attention_mask", "token_type_ids"]
 
 
+def calculate_metrics(
+    epoch_loss: float, test_docs: list[Document], label_list: list[str]
+) -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:
+    for doc in test_docs:
+        if PROCESSING_EXCEPTION in doc.metadata:
+            logger.error(doc.metadata[PROCESSING_EXCEPTION])
+            break
+    ner_dict = score_sections(test_docs)
+    ner_results = aggregate_ner_results(ner_dict)
+    all_results: dict[str, Any] = {}
+    tensorboard_loggables = {}
+    all_results["false_positives"] = {}
+    all_results["false_negatives"] = {}
+    for clazz, result in ner_results.items():
+        tb_results = {}
+        tb_results["precision"] = result.precision
+        tb_results["recall"] = result.recall
+        tensorboard_loggables[clazz] = tb_results
+        support = result.tp + result.fn
+
+        logger.info(f"{clazz} precision: {result.precision}")
+        logger.info(f"{clazz} recall: {result.recall}")
+        logger.info(f"{clazz} support: {support}")
+
+        all_results[f"{clazz}_precision"] = result.precision
+        all_results[f"{clazz}_recall"] = result.recall
+        all_results[f"{clazz}_support"] = support
+
+        false_positives: defaultdict[str, dict[str, int]] = defaultdict(dict)
+        for match, count in result.fp_info:
+            false_positives[clazz][match] = count
+        all_results["false_positives"].update(dict(false_positives))
+        false_negatives: defaultdict[str, dict[str, int]] = defaultdict(dict)
+        for match, count in result.fn_info:
+            false_negatives[clazz][match] = count
+        all_results["false_negatives"].update(dict(false_negatives))
+    label_set = set(label_list)
+    label_set.remove(ENTITY_OUTSIDE_SYMBOL)
+    if len(ner_results) != len(label_set):
+        mean_f1 = 0.0
+        found_str = "\n".join(ner_results.keys())
+        need_str = "\n".join(set(label_set).difference(ner_results))
+        logger.info(
+            f"model not considered as not all labels represented. Found: \n {found_str}\n Need: \n {need_str}"
+        )
+    else:
+        try:
+            mean_f1 = sum(
+                [
+                    (2 * (x.precision * x.recall) / (x.precision + x.recall))
+                    for x in ner_results.values()
+                ]
+            ) / len(ner_results)
+        except ZeroDivisionError:
+            logger.info("model not considered as some test values are 0")
+            mean_f1 = 0.0
+    all_results["test_loss"] = epoch_loss
+    tensorboard_loggables["loss"] = {"test_loss": epoch_loss}
+    all_results["mean_f1"] = mean_f1
+    tensorboard_loggables["mean_f1"] = {"f1": mean_f1}
+    return all_results, tensorboard_loggables
+
+
 class Trainer:
     def __init__(
         self,
@@ -350,7 +415,7 @@ class Trainer:
         if self.ls_wrapper:
             self.ls_wrapper.update(model_test_docs, global_step)
 
-        all_results, tensorboad_loggables = self.calculate_metrics(
+        all_results, tensorboad_loggables = calculate_metrics(
             epoch_loss, model_test_docs, self.label_list
         )
         if self.summary_writer:
@@ -371,69 +436,6 @@ class Trainer:
         for key, value in tensorboard_loggables.items():
             for sub_key, sub_value in value.items():
                 self._write_to_tensorboard(global_step, key, {sub_key: sub_value})
-
-    @staticmethod
-    def calculate_metrics(
-        epoch_loss: float, test_docs: list[Document], label_list: list[str]
-    ) -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:
-        for doc in test_docs:
-            if PROCESSING_EXCEPTION in doc.metadata:
-                logger.error(doc.metadata[PROCESSING_EXCEPTION])
-                break
-        ner_dict = score_sections(test_docs)
-        ner_results = aggregate_ner_results(ner_dict)
-        all_results: dict[str, Any] = {}
-        tensorboard_loggables = {}
-        for clazz, result in ner_results.items():
-            tb_results = {}
-            tb_results["precision"] = result.precision
-            tb_results["recall"] = result.recall
-            tensorboard_loggables[clazz] = tb_results
-            support = result.tp + result.fn
-
-            logger.info(f"{clazz} precision: {result.precision}")
-            logger.info(f"{clazz} recall: {result.recall}")
-            logger.info(f"{clazz} support: {support}")
-
-            all_results[f"{clazz}_precision"] = result.precision
-            all_results[f"{clazz}_recall"] = result.recall
-            all_results[f"{clazz}_support"] = support
-            all_results["false_positives"] = {}
-            all_results["false_negatives"] = {}
-
-            false_positives: defaultdict[str, dict[str, int]] = defaultdict(dict)
-            for match, count in result.fp_info:
-                false_positives[clazz][match] = count
-            all_results["false_positives"].update(dict(false_positives))
-            false_negatives: defaultdict[str, dict[str, int]] = defaultdict(dict)
-            for match, count in result.fn_info:
-                false_negatives[clazz][match] = count
-            all_results["false_negatives"].update(dict(false_negatives))
-        label_set = set(label_list)
-        label_set.remove(ENTITY_OUTSIDE_SYMBOL)
-        if len(ner_results) != len(label_set):
-            mean_f1 = 0.0
-            found_str = "\n".join(ner_results.keys())
-            need_str = "\n".join(set(label_set).difference(ner_results))
-            logger.info(
-                f"model not considered as not all labels represented. Found: \n {found_str}\n Need: \n {need_str}"
-            )
-        else:
-            try:
-                mean_f1 = sum(
-                    [
-                        (2 * (x.precision * x.recall) / (x.precision + x.recall))
-                        for x in ner_results.values()
-                    ]
-                ) / len(ner_results)
-            except ZeroDivisionError:
-                logger.info("model not considered as some test values are 0")
-                mean_f1 = 0.0
-        all_results["test_loss"] = epoch_loss
-        tensorboard_loggables["loss"] = {"test_loss": epoch_loss}
-        all_results["mean_f1"] = mean_f1
-        tensorboard_loggables["mean_f1"] = {"f1": mean_f1}
-        return all_results, tensorboard_loggables
 
     def _process_docs(self, model: PreTrainedModel) -> list[Document]:
         with tempfile.TemporaryDirectory() as tempdir:
