@@ -61,3 +61,5 @@ class PredictionConfig:
     device: str
     #: architecture to use. Currently supports bert, deberta, distilbert
     architecture: str = "bert"
+    #: whether to use multilabel token classification
+    use_multilabel: bool = True

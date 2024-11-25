@@ -1,9 +1,11 @@
 """Use this script to test the model with custom text inputs and visualize the
 predictions in Label Studio."""
 
+import json
 from pathlib import Path
 
 import hydra
+from hydra.utils import instantiate
 from omegaconf import DictConfig
 
 from kazu.data import Document
@@ -26,9 +28,13 @@ from kazu.utils.constants import HYDRA_VERSION_BASE
     config_name="default",
 )
 def main(cfg: DictConfig) -> None:
-    label_list = cfg.label_list
-    assert label_list == sorted(label_list)
-    prediction_config: PredictionConfig = cfg.prediction_config
+    prediction_config: PredictionConfig = instantiate(cfg.prediction_config)
+
+    with open(Path(prediction_config.path) / "config.json", "r") as file:
+        model_config = json.load(file)
+        id2label = {int(idx): label for idx, label in model_config["id2label"].items()}
+        label_list = [label for _, label in sorted(id2label.items())]
+    print(f"There are {len(label_list)} labels.")
 
     step = TransformersModelForTokenClassificationNerStep(
         path=str(Path(prediction_config.path).absolute()),
