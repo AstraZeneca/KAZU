@@ -11,6 +11,7 @@ import hydra
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 
+from kazu.data import Document
 from kazu.pipeline import Pipeline
 from kazu.steps.ner.hf_token_classification import (
     TransformersModelForTokenClassificationNerStep,
@@ -28,6 +29,13 @@ from kazu.training.train_multilabel_ner import (
     move_entities_to_metadata,
 )
 from kazu.utils.constants import HYDRA_VERSION_BASE
+
+
+def save_out_predictions(output_dir: Path, documents: list[Document]) -> None:
+    for doc in documents:
+        file_path = output_dir / f"{doc.idx}.json"
+        with file_path.open("w") as f:
+            f.write(doc.to_json())
 
 
 @hydra.main(
@@ -64,6 +72,7 @@ def main(cfg: DictConfig) -> None:
     pipeline(documents)
     print(f"Predicted {len(documents)} documents in {time.time() - start:.2f} seconds.")
 
+    save_out_predictions(Path(cfg.predictions_dir), documents)
     print("Calculating metrics")
     metrics, _ = calculate_metrics(0, documents, label_list)
     with open(Path(prediction_config.path) / "test_metrics.json", "w") as file:
