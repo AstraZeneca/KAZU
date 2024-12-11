@@ -8,6 +8,7 @@ import time
 from pathlib import Path
 
 import hydra
+import tqdm
 from hydra.utils import instantiate
 from omegaconf import DictConfig
 
@@ -19,6 +20,7 @@ from kazu.steps.ner.hf_token_classification import (
 from kazu.steps.ner.tokenized_word_processor import TokenizedWordProcessor
 from kazu.training.config import PredictionConfig
 from kazu.training.modelling_utils import (
+    chunks,
     create_wrapper,
     doc_yielder,
     get_label_list_from_model,
@@ -69,10 +71,16 @@ def main(cfg: DictConfig) -> None:
     documents = move_entities_to_metadata(documents)
     print("Predicting with the KAZU pipeline")
     start = time.time()
-    pipeline(documents)
+    docs_in_batch = 10
+    for documents_batch in tqdm.tqdm(
+        chunks(documents, docs_in_batch), total=len(documents) // docs_in_batch
+    ):
+        pipeline(documents_batch)
     print(f"Predicted {len(documents)} documents in {time.time() - start:.2f} seconds.")
 
+    Path(cfg.predictions_dir).mkdir(parents=True, exist_ok=True)
     save_out_predictions(Path(cfg.predictions_dir), documents)
+
     print("Calculating metrics")
     metrics, _ = calculate_metrics(0, documents, label_list)
     with open(Path(prediction_config.path) / "test_metrics.json", "w") as file:
