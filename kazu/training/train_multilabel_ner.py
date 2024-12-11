@@ -47,14 +47,9 @@ from kazu.training.modelling import (
     DebertaForMultiLabelTokenClassification,
     DistilBertForMultiLabelTokenClassification,
 )
+from kazu.training.modelling_utils import chunks
 
 logger = logging.getLogger(__name__)
-
-
-def chunks(lst: list[Any], n: int) -> Iterable[list[Any]]:
-    """Yield successive n-sized chunks from lst."""
-    for i in range(0, len(lst), n):
-        yield lst[i : i + n]
 
 
 class LSManagerViewWrapper:

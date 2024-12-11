@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Any, Iterable, Optional
 
 from hydra.utils import instantiate
 from omegaconf import DictConfig
@@ -44,6 +44,12 @@ def test_doc_yielder() -> Iterable[Document]:
     )
     doc = Document(sections=[section])
     yield doc
+
+
+def chunks(lst: list[Any], n: int) -> Iterable[list[Any]]:
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i : i + n]
 
 
 def get_label_list(path: PathLike) -> list[str]:
