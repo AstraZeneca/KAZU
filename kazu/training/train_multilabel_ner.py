@@ -4,7 +4,6 @@ import json
 import logging
 import math
 import pickle
-import random
 import shutil
 import tempfile
 from collections import defaultdict
@@ -27,12 +26,10 @@ from transformers import (
 )
 
 from kazu.annotation.acceptance_test import aggregate_ner_results, score_sections
-from kazu.annotation.label_studio import LabelStudioAnnotationView, LabelStudioManager
 from kazu.data import (
     ENTITY_OUTSIDE_SYMBOL,
     PROCESSING_EXCEPTION,
     Document,
-    Entity,
     NumericMetric,
     Section,
 )
@@ -47,54 +44,9 @@ from kazu.training.modelling import (
     DebertaForMultiLabelTokenClassification,
     DistilBertForMultiLabelTokenClassification,
 )
-from kazu.training.modelling_utils import chunks
+from kazu.training.modelling_utils import LSManagerViewWrapper, chunks
 
 logger = logging.getLogger(__name__)
-
-
-class LSManagerViewWrapper:
-    def __init__(self, view: LabelStudioAnnotationView, ls_manager: LabelStudioManager):
-        self.ls_manager = ls_manager
-        self.view = view
-
-    def get_gold_ents_for_side_by_side_view(self, docs: list[Document]) -> list[list[Document]]:
-        result = []
-        for doc in docs:
-            doc_cp = copy.deepcopy(doc)
-            if PROCESSING_EXCEPTION in doc_cp.metadata:
-                logger.error(doc.metadata[PROCESSING_EXCEPTION])
-                break
-            for section in doc_cp.sections:
-                gold_ents = []
-                for ent in section.metadata.get("gold_entities", []):
-                    if isinstance(ent, dict):
-                        ent = Entity.from_dict(ent)
-                    gold_ents.append(ent)
-                section.entities = gold_ents
-            result.append([doc_cp, doc])
-        return result
-
-    def update(
-        self, test_docs: list[Document], global_step: Union[int, str], has_gs: bool = True
-    ) -> None:
-        ls_manager = LabelStudioManager(
-            headers=self.ls_manager.headers,
-            project_name=f"{self.ls_manager.project_name}_test_{global_step}",
-        )
-
-        ls_manager.delete_project_if_exists()
-        ls_manager.create_linking_project()
-        docs_subset = random.sample(test_docs, min([len(test_docs), 100]))
-        if not docs_subset:
-            logger.info("no results to represent yet")
-            return
-        if has_gs:
-            side_by_side = self.get_gold_ents_for_side_by_side_view(docs_subset)
-            ls_manager.update_view(self.view, side_by_side)
-            ls_manager.update_tasks(side_by_side)
-        else:
-            ls_manager.update_view(self.view, docs_subset)
-            ls_manager.update_tasks(docs_subset)
 
 
 @dataclasses.dataclass
