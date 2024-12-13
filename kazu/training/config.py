@@ -45,6 +45,8 @@ class TrainingConfig:
     architecture: str = "bert"
     #: fraction of epoch to complete before evaluations begin
     epoch_completion_fraction_before_evals: float = 0.75
+    #: The random seed to use
+    seed: int = 42
 
 
 @dataclass

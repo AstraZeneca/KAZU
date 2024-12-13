@@ -4,6 +4,7 @@ import json
 import logging
 import math
 import pickle
+import random
 import shutil
 import tempfile
 from collections import defaultdict
@@ -337,6 +338,7 @@ class Trainer:
         self.label_list = label_list
         self.pretrained_model_name_or_path = pretrained_model_name_or_path
         self.keys_to_use = _select_keys_to_use(self.training_config.architecture)
+        random.seed(training_config.seed)
 
     def _write_to_tensorboard(
         self, global_step: int, main_tag: str, tag_scalar_dict: dict[str, NumericMetric]
@@ -360,7 +362,8 @@ class Trainer:
 
         model_test_docs = self._process_docs(model)
         if self.ls_wrapper:
-            self.ls_wrapper.update(model_test_docs, global_step)
+            sample_test_docs = random.sample(model_test_docs, min([len(model_test_docs), 100]))
+            self.ls_wrapper.update(sample_test_docs, global_step)
 
         all_results, tensorboad_loggables = calculate_metrics(
             epoch_loss, model_test_docs, self.label_list

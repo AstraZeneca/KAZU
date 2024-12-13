@@ -1,7 +1,6 @@
 import copy
 import json
 import logging
-import random
 from collections.abc import Iterable
 from pathlib import Path
 from typing import Any, Optional, Union
@@ -102,26 +101,24 @@ class LSManagerViewWrapper:
         return result
 
     def update(
-        self, test_docs: list[Document], global_step: Union[int, str], has_gs: bool = True
+        self, docs: list[Document], global_step: Union[int, str], has_gs: bool = True
     ) -> None:
         ls_manager = LabelStudioManager(
             headers=self.ls_manager.headers,
             project_name=f"{self.ls_manager.project_name}_test_{global_step}",
         )
-
         ls_manager.delete_project_if_exists()
         ls_manager.create_linking_project()
-        docs_subset = random.sample(test_docs, min([len(test_docs), 100]))
-        if not docs_subset:
+        if not docs:
             logger.info("no results to represent yet")
             return
         if has_gs:
-            side_by_side = self.get_gold_ents_for_side_by_side_view(docs_subset)
+            side_by_side = self.get_gold_ents_for_side_by_side_view(docs)
             ls_manager.update_view(self.view, side_by_side)
             ls_manager.update_tasks(side_by_side)
         else:
-            ls_manager.update_view(self.view, docs_subset)
-            ls_manager.update_tasks(docs_subset)
+            ls_manager.update_view(self.view, docs)
+            ls_manager.update_tasks(docs)
 
 
 def create_wrapper(cfg: DictConfig, label_list: list[str]) -> Optional[LSManagerViewWrapper]:
