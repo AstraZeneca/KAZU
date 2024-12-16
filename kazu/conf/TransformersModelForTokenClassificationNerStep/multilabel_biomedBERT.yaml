@@ -1,0 +1,44 @@
+_target_: kazu.steps.ner.hf_token_classification.TransformersModelForTokenClassificationNerStep
+path: ${oc.env:KAZU_MODEL_PACK}/multilabel_biomedBERT
+batch_size: 2
+stride: 64
+max_sequence_length: 512
+keys_to_use: #distilbert for token classification doesn't use token_type_ids
+  - input_ids
+  - attention_mask
+  - token_type_ids
+entity_splitter:
+  _target_: kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter
+  entity_conditions:
+    gene:
+      - _target_: kazu.steps.ner.entity_post_processing.SplitOnNumericalListPatternWithPrefix
+      - _target_: kazu.steps.ner.entity_post_processing.SplitOnConjunctionPattern
+        path: ${SciSpacyPipeline.path}
+    disease:
+      - _target_: kazu.steps.ner.entity_post_processing.SplitOnConjunctionPattern
+        path: ${SciSpacyPipeline.path}
+tokenized_word_processor:
+  _target_: kazu.steps.ner.tokenized_word_processor.TokenizedWordProcessor
+  labels:
+    - "O"
+    - "anatomical part or tissue"
+    - "biological process"
+    - "cell type"
+    - "cellular component"
+    - "chemical"
+    - "diagnostic"
+    - "disease, disorder, phenotype or trait"
+    - "drug"
+    - "gene or gene product"
+    - "instrument"
+    - "measurement"
+    - "method"
+    - "mutation"
+    - "organization"
+    - "place"
+    - "protein domain or region"
+    - "species"
+    - "treatment"
+  strip_re:
+    gene: "( (gene|protein)s?)+$"
+  use_multilabel: true
