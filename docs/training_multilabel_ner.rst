@@ -1,4 +1,4 @@
-Build an amasing NER model from LLM annotated data!
+Build an amazing NER model from LLM annotated data!
 ====================================================
 
 Intro
