@@ -1,1 +1,0 @@
-Fix issue with TransformersModelForTokenClassificationNerStep when processing large amounts of documents. The fix offloads tensors onto cpu before performin the torch.cat operation which lead to a zero tensor before.
