@@ -49,6 +49,7 @@ Note, if running the script on MPS you will need to add the following to the top
     import os
 
     os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
+
 as one of the functions used in the Transformer NER step are not supported on MPS.
 
 Our results with this approach
