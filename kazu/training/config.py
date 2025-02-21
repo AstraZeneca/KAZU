@@ -41,8 +41,6 @@ class TrainingConfig:
     device: str
     #: number of workers for dataloader
     workers: int
-    #: architecture to use. Currently supports bert, deberta, distilbert
-    architecture: str = "bert"
     #: fraction of epoch to complete before evaluations begin
     epoch_completion_fraction_before_evals: float = 0.75
     #: The random seed to use
@@ -61,7 +59,5 @@ class PredictionConfig:
     max_sequence_length: int
     #: device to train on
     device: str
-    #: architecture to use. Currently supports bert, deberta, distilbert
-    architecture: str = "bert"
     #: whether to use multilabel token classification
     use_multilabel: bool = True

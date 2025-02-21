@@ -15,7 +15,6 @@ from kazu.steps.ner.hf_token_classification import (
 from kazu.steps.ner.tokenized_word_processor import TokenizedWordProcessor
 from kazu.training.config import PredictionConfig
 from kazu.training.modelling_utils import create_wrapper, get_label_list_from_model
-from kazu.training.train_multilabel_ner import _select_keys_to_use
 from kazu.utils.constants import HYDRA_VERSION_BASE
 
 
@@ -38,7 +37,6 @@ def main(cfg: DictConfig) -> None:
         stride=prediction_config.stride,
         max_sequence_length=prediction_config.max_sequence_length,
         tokenized_word_processor=TokenizedWordProcessor(labels=label_list, use_multilabel=True),
-        keys_to_use=_select_keys_to_use(prediction_config.architecture),
         device=prediction_config.device,
     )
     pipeline = Pipeline(steps=[step])

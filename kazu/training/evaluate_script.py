@@ -25,11 +25,7 @@ from kazu.training.modelling_utils import (
     doc_yielder,
     get_label_list_from_model,
 )
-from kazu.training.train_multilabel_ner import (
-    _select_keys_to_use,
-    calculate_metrics,
-    move_entities_to_metadata,
-)
+from kazu.training.train_multilabel_ner import calculate_metrics, move_entities_to_metadata
 from kazu.utils.constants import HYDRA_VERSION_BASE
 
 
@@ -61,7 +57,6 @@ def main(cfg: DictConfig) -> None:
         tokenized_word_processor=TokenizedWordProcessor(
             labels=label_list, use_multilabel=prediction_config.use_multilabel
         ),
-        keys_to_use=_select_keys_to_use(prediction_config.architecture),
         device=prediction_config.device,
     )
     pipeline = Pipeline(steps=[step])

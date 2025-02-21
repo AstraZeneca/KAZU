@@ -3,6 +3,7 @@ from typing import Optional, Union, Tuple
 import torch
 from torch import nn
 from transformers import (
+    AutoConfig,
     DistilBertForTokenClassification,
     BertForTokenClassification,
     PretrainedConfig,
@@ -211,3 +212,28 @@ class BertForMultiLabelTokenClassification(BertForTokenClassification):  # type:
             ignore_index=self.ignore_index,
             labels=labels,
         )
+
+
+class AutoModelForMultiLabelTokenClassification:
+    _model_mapping = {
+        "deberta": DebertaForMultiLabelTokenClassification,
+        "distilbert": DistilBertForMultiLabelTokenClassification,
+        "bert": BertForMultiLabelTokenClassification,
+    }
+
+    @classmethod
+    def from_pretrained(
+        cls,
+        pretrained_model_name_or_path: str,
+        *model_args,
+        **kwargs,
+    ) -> nn.Module:
+        config = AutoConfig.from_pretrained(pretrained_model_name_or_path)
+        model_class = cls._model_mapping.get(config.model_type)
+
+        if model_class is None:
+            raise ValueError(
+                f"Model type `{config.model_type}` is not supported for multi-label token classification."
+            )
+
+        return model_class.from_pretrained(pretrained_model_name_or_path, *model_args, **kwargs)
