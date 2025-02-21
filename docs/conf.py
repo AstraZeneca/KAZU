@@ -270,6 +270,7 @@ nitpick_ignore = [
     # no sphinx for streamlit
     ("py:class", "streamlit.delta_generator.DeltaGenerator"),
     # vertexai
+    ("py:class", "SafetySettingsType"),
     ("py:class", "vertexai.generative_models._generative_models.SafetySetting"),
     ("py:class", "google.cloud.aiplatform_v1beta1.types.content.HarmCategory"),
     ("py:class", "google.cloud.aiplatform_v1beta1.types.content.SafetySetting.HarmBlockThreshold"),
