@@ -39,7 +39,7 @@ jobs:
         . /tmp/kazu-env/bin/activate
         make -C docs html
     - name: upload pages artifact
-      uses: actions/upload-pages-artifact@v1
+      uses: actions/upload-pages-artifact@v3
       with:
         path: ./docs/_build/html
 
