@@ -73,5 +73,5 @@ In our benchmarks, W8A8 quantization via TorchInductor achieved up to a 2&times;
 
 - [Tuning Guide for Deep Learning with Intel AVX-512 and Intel Deep Learning Boost on 3rd Generation Intel Xeon Scalable Processors](https://www.intel.com/content/www/us/en/developer/articles/guide/deep-learning-with-avx512-and-dl-boost.html)
 - [PyTorch 2 Export Quantization with X86 Backend through Inductor](https://pytorch.org/tutorials/prototype/pt2e_quant_x86_inductor.html)
-- [PyTorch 2.0 Export Post Training Static Quantization](https://pytorch.org/tutorials/prototype/pt2e_quant_ptq_static.html)
+- [(prototype) PyTorch 2 Export Post Training Quantization](https://pytorch.org/tutorials/prototype/pt2e_quant_ptq.html)
 - [Using Max-Autotune Compilation on CPU for Better Performance](https://pytorch.org/tutorials/prototype/max_autotune_on_CPU_tutorial.html)
