@@ -1,11 +1,13 @@
-from typing import Optional, Union, Tuple
+from typing import Any, Optional, Tuple, Union
 
 import torch
 from torch import nn
 from transformers import (
+    AutoConfig,
     DistilBertForTokenClassification,
     BertForTokenClassification,
     PretrainedConfig,
+    PreTrainedModel,
     DebertaV2ForTokenClassification,
 )
 from transformers.modeling_outputs import TokenClassifierOutput, BaseModelOutput
@@ -15,7 +17,7 @@ check_min_version("4.9.0")  # transformers version check
 
 
 def multi_label_forward(
-    model: nn.Module,
+    model: PreTrainedModel,
     outputs: BaseModelOutput,
     return_dict: bool,
     device: torch.device,
@@ -211,3 +213,28 @@ class BertForMultiLabelTokenClassification(BertForTokenClassification):  # type:
             ignore_index=self.ignore_index,
             labels=labels,
         )
+
+
+class AutoModelForMultiLabelTokenClassification:
+    _model_mapping: dict[str, type[PreTrainedModel]] = {
+        "deberta": DebertaForMultiLabelTokenClassification,
+        "distilbert": DistilBertForMultiLabelTokenClassification,
+        "bert": BertForMultiLabelTokenClassification,
+    }
+
+    @classmethod
+    def from_pretrained(
+        cls,
+        pretrained_model_name_or_path: str,
+        *model_args: Any,
+        **kwargs: Any,
+    ) -> PreTrainedModel:
+        config = AutoConfig.from_pretrained(pretrained_model_name_or_path)
+        model_class = cls._model_mapping.get(config.model_type)
+
+        if model_class is None:
+            raise ValueError(
+                f"Model type `{config.model_type}` is not supported for multi-label token classification."
+            )
+
+        return model_class.from_pretrained(pretrained_model_name_or_path, *model_args, **kwargs)

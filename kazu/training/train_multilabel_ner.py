@@ -40,11 +40,7 @@ from kazu.steps.ner.hf_token_classification import (
 )
 from kazu.steps.ner.tokenized_word_processor import TokenizedWordProcessor
 from kazu.training.config import TrainingConfig
-from kazu.training.modelling import (
-    BertForMultiLabelTokenClassification,
-    DebertaForMultiLabelTokenClassification,
-    DistilBertForMultiLabelTokenClassification,
-)
+from kazu.training.modelling import AutoModelForMultiLabelTokenClassification
 from kazu.training.modelling_utils import LSManagerViewWrapper, chunks
 
 logger = logging.getLogger(__name__)
@@ -244,12 +240,6 @@ def move_entities_to_metadata(docs: list[Document]) -> list[Document]:
     return docs
 
 
-def _select_keys_to_use(architecture: str) -> list[str]:
-    if architecture == "distilbert":
-        return ["input_ids", "attention_mask"]
-    return ["input_ids", "attention_mask", "token_type_ids"]
-
-
 def calculate_metrics(
     epoch_loss: float, test_docs: list[Document], label_list: list[str]
 ) -> tuple[dict[str, Any], dict[str, dict[str, Any]]]:
@@ -337,7 +327,6 @@ class Trainer:
         self.test_dataset = test_dataset
         self.label_list = label_list
         self.pretrained_model_name_or_path = pretrained_model_name_or_path
-        self.keys_to_use = _select_keys_to_use(self.training_config.architecture)
         random.seed(training_config.seed)
 
     def _write_to_tensorboard(
@@ -399,7 +388,6 @@ class Trainer:
                 tokenized_word_processor=TokenizedWordProcessor(
                     labels=self.label_list, use_multilabel=True
                 ),
-                keys_to_use=self.keys_to_use,
                 device=self.training_config.device,
             )
 
@@ -449,29 +437,13 @@ class Trainer:
         label2id = {label: i for i, label in enumerate(self.label_list)}
         id2label = {v: k for k, v in label2id.items()}
 
-        if self.training_config.architecture == "bert":
-            model = BertForMultiLabelTokenClassification.from_pretrained(
-                self.pretrained_model_name_or_path,
-                num_labels=len(self.label_list),
-                id2label=id2label,
-                label2id=label2id,
-            )
-        elif self.training_config.architecture == "distilbert":
-            model = DistilBertForMultiLabelTokenClassification.from_pretrained(
-                self.pretrained_model_name_or_path,
-                num_labels=len(self.label_list),
-                id2label=id2label,
-                label2id=label2id,
-            )
-        elif self.training_config.architecture == "deberta":
-            model = DebertaForMultiLabelTokenClassification.from_pretrained(
-                self.pretrained_model_name_or_path,
-                num_labels=len(self.label_list),
-                id2label=id2label,
-                label2id=label2id,
-            )
-        else:
-            raise ValueError(f"unknown architecture {self.training_config.architecture}")
+        model = AutoModelForMultiLabelTokenClassification.from_pretrained(
+            self.pretrained_model_name_or_path,
+            num_labels=len(self.label_list),
+            id2label=id2label,
+            label2id=label2id,
+        )
+
         logger.info(f"training samples: {len(self.train_dataset)}")
         train_dataloader = DataLoader(
             self.train_dataset,

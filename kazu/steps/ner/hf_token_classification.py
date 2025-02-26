@@ -65,7 +65,7 @@ class TransformersModelForTokenClassificationNerStep(Step):
         stride: int,
         max_sequence_length: int,
         tokenized_word_processor: TokenizedWordProcessor,
-        keys_to_use: Iterable[str],
+        keys_to_use: Optional[Iterable[str]] = None,
         entity_splitter: Optional[NonContiguousEntitySplitter] = None,
         device: str = "cpu",
     ):
@@ -77,11 +77,12 @@ class TransformersModelForTokenClassificationNerStep(Step):
         :param max_sequence_length: passed to HF tokenizers (for splitting long docs)
         :param tokenized_word_processor:
         :param keys_to_use: keys to use from the encodings. Note that this varies depending on the flaour of bert model (e.g. distilbert requires token_type_ids)
+
+            .. deprecated:: No longer used: automatically inferred from the model.
         :param entity_splitter: to detect non-contiguous entities if provided
         :param device: device to run the model on. Defaults to "cpu"
         """
 
-        self.keys_to_use = set(keys_to_use)
         self.device = device
         self.entity_splitter = entity_splitter
         if max_sequence_length % 2 != 0:
@@ -97,6 +98,7 @@ class TransformersModelForTokenClassificationNerStep(Step):
         self.tokeniser: PreTrainedTokenizerBase = AutoTokenizer.from_pretrained(
             path, config=self.config
         )
+        self.keys_to_use = self.tokeniser.model_input_names
         self.model = AutoModelForTokenClassification.from_pretrained(
             path, config=self.config
         ).eval()

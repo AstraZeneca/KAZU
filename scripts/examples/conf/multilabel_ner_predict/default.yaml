@@ -10,7 +10,6 @@ prediction_config:
   stride: 64
   max_sequence_length: 512
   device: cpu
-  architecture: bert
   use_multilabel: true
 css_colors:
   - "#000000" # Black

@@ -3,10 +3,6 @@ path: ${oc.env:KAZU_MODEL_PACK}/multilabel_biomedBERT
 batch_size: 2
 stride: 64
 max_sequence_length: 512
-keys_to_use: #distilbert for token classification doesn't use token_type_ids
-  - input_ids
-  - attention_mask
-  - token_type_ids
 entity_splitter:
   _target_: kazu.steps.ner.entity_post_processing.NonContiguousEntitySplitter
   entity_conditions:

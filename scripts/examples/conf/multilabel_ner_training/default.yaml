@@ -18,7 +18,6 @@ training_config:
   lr_scheduler_warmup_prop: 0.1
   test_overfit: false
   device: mps
-  architecture: bert
   workers: 2
 css_colors:
   - "#000000" # Black
