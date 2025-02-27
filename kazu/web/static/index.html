@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kazu - Biomedical NLP Framework</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        
+        h1 {
+            text-align: center;
+            width: 100%;
+            margin-top: 20px;
+        }
+        h3 {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .explanation {
+            width: 80%;
+            margin: 15px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+        
+        .container {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .tenbox {
+            width: 83.33%; /* 10/12 * 100 = 83.33% */
+            box-sizing: border-box;
+            text-align: center;
+        }
+                
+        #input-text {
+            width: 100%;
+            border: 1px solid black;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: left;
+        }
+                
+        #content, #json-content {
+            width: 100%; 
+            border: 1px solid black;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: left;
+            white-space: pre-wrap; /* Preserve whitespace and line breaks */
+        }
+
+        .submit-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 16px;
+            margin: 20px auto;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            display: block;
+            width: 150px; /* Add width to make the button bigger */
+        }
+
+        .entity {
+            font-weight: bold;
+            color: blue;
+            cursor: pointer;
+            position: relative;
+        }
+        .tooltip {
+            visibility: hidden;
+            background-color: black;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%; /* Position above the text */
+            left: 50%;
+            margin-left: -60px;
+        }
+        .entity:hover .tooltip {
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <h1>Kazu - Biomedical NLP Framework</h1>
+
+    <div class="explanation">
+        <p>Welcome to the Web API of Kazu (Korea AstraZeneca University), a python biomedical NLP framework built in collaboration with Korea University,
+        designed to handle production workloads. This library aims to simplify the process of using state of the art NLP research in production systems. Some of the
+        research contained within are our own, but most of it comes from the community, for which we are immensely grateful.</p>
+        <p>The Web API is designed for light usage, if you need to run kazu for a heavy workload, please use the library directly. The Documentation for the library is available
+        <em><a rel="noopener noreferrer" target="_blank" href="https://astrazeneca.github.io/KAZU/index.html">here</a></em></p>
+        <p><a rel="noopener noreferrer" target="_blank" href="./api/docs#/">Please click here for the API documentation (byFastAPI)</a> - Try out with <b>[POST] /kazu/ner_and_linking</b> for an example run!</p>
+        <p><a rel="noopener noreferrer" target="_blank" href="https://github.com/AstraZeneca/KAZU">Please click here for the Github repository of Kazu (full library)</a> and <a rel="noopener noreferrer" target="_blank" href="https://github.com/dmis-lab/KAZU-NER-module">please click here for the TinyBERN2 (Transformer module) training and evaluation code</a></p>
+    </div>
+    
+    <div class="explanation">
+        <h3>Input text:</h3>
+        <form id="text-form">
+            <textarea id="input-text" rows="8" placeholder="Enter text here..." wrap="soft"></textarea><br>
+            <button type="submit" class="submit-button">Submit</button>
+        </form>
+    </div>
+    
+    <div class="explanation">
+        <div>
+        <h3> Annotated text:</h3>
+        <div class="container">
+            <br>
+            <div id="content">Waiting for the input...</div>
+        </div>
+        <br>
+        <h3>NER Results in JSON format:</h3>
+        <div class="container">
+            <br>
+            <div id="json-content">Waiting for the input...</div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('text-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            const contentDiv = document.getElementById('content');
+            const jsonContentDiv = document.getElementById('json-content');
+            contentDiv.innerHTML = 'Data sent to Kazu API. Please wait for a few seconds while we process ... ';
+            jsonContentDiv.innerHTML = 'Data sent to Kazu API. Please wait for a few seconds while we process ... ';
+
+            const inputText = document.getElementById('input-text').value;
+            const response = await fetch('/visualize/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text: inputText })
+            });
+            const nerResults = await response.json();
+            console.log('NER Results:', nerResults); // Add this line for debugging
+            displayNERResults(nerResults);
+            displayJSONResults(nerResults, inputText.length);
+        });
+
+        function displayNERResults(nerResults) {
+            const contentDiv = document.getElementById('content');
+            contentDiv.innerHTML = '';
+            
+            nerResults.forEach(doc => {
+                doc.sections.forEach(section => {
+                    let text = section.text;
+                    const entities = section.entities.sort((a, b) => a.spans[0].start - b.spans[0].start);
+
+                    // Merging overlapping entities
+                    let mergedEntities = [];
+                    for (let i = 0; i < entities.length; i++) {
+                        const entity = entities[i];
+                        const span = entity.spans[0];
+                        if (mergedEntities.length > 0) {
+                            const lastEntity = mergedEntities[mergedEntities.length - 1];
+                            const lastSpan = lastEntity.spans[0];
+                            if (span.start < lastSpan.end) {
+                                lastSpan.end = Math.max(lastSpan.end, span.end);
+                                lastEntity.entity_class += `, ${entity.entity_class}`;
+                                lastEntity.mention_confidence += `, ${entity.mention_confidence || 'N/A'}`;
+                                continue;
+                            }
+                        }
+                        entity.mention_confidence = entity.mention_confidence || 'N/A';
+                        mergedEntities.push(entity);
+                    }
+                    
+                    console.log('Merged Entities:', mergedEntities); // Add this line for debugging
+
+                    let highlightedText = '';
+                    let currentIndex = 0;
+
+                    mergedEntities.forEach(entity => {
+                        const span = entity.spans[0];
+                        const before = text.substring(currentIndex, span.start);
+                        const match = text.substring(span.start, span.end);
+                        
+                        // Create tooltip content with each type and confidence on a new line
+                        const tooltipContent = entity.entity_class.split(', ').map((type, index) => {
+                            const confidence = entity.mention_confidence.split(', ')[index];
+                            return `${type} (${confidence})`;
+                        }).join('<br>');
+
+                        highlightedText += before + `<span class="entity">${match}<span class="tooltip">${tooltipContent}</span></span>`;
+                        currentIndex = span.end;
+                        
+                        console.log(`Processed entity: ${match}, before text: ${before}, highlightedText so far: ${highlightedText}`); // Add this line for detailed debugging
+                    
+                    });
+
+                    highlightedText += text.substring(currentIndex);
+                    console.log('Highlighted Text:', highlightedText); // Add this line for debugging
+                    
+                    contentDiv.innerHTML += `<p>${highlightedText}</p>`;
+                });
+            });
+        }
+
+        function displayJSONResults(nerResults, textLength) {
+            const jsonContentDiv = document.getElementById('json-content');
+            if (textLength < 2000) {
+                jsonContentDiv.innerHTML = `<pre>${JSON.stringify(nerResults, null, 2)}</pre>`;
+            } else {
+                jsonContentDiv.innerHTML = `Too long to display here. Please go to the <a href="./api/docs#/">API documentation webpage</a>.`;
+            }
+        }
+    </script>
+</body>
+</html>
