@@ -1,5 +1,7 @@
 import logging
+import os
 from collections.abc import Iterator
+from enum import Enum
 from typing import Any, Iterable, Optional, cast
 
 import torch
@@ -25,6 +27,16 @@ from kazu.steps.ner.tokenized_word_processor import (
 from kazu.utils.utils import documents_to_document_section_batch_encodings_map
 
 logger = logging.getLogger(__name__)
+
+
+class _Feature(str, Enum):
+    INDUCTOR = "KAZU_ENABLE_INDUCTOR"
+    MAX_AUTOTUNE = "KAZU_ENABLE_MAX_AUTOTUNE"
+    QUANTIZATION = "KAZU_ENABLE_QUANTIZATION"
+
+    @property
+    def is_enabled(self) -> bool:
+        return os.getenv(self.value, "0") == "1"
 
 
 class HFDataset(IterableDataset[dict[str, Any]]):
@@ -104,6 +116,27 @@ class TransformersModelForTokenClassificationNerStep(Step):
         ).eval()
         self.tokenized_word_processor = tokenized_word_processor
         self.model.to(device)
+
+        self._optimize_model()
+
+    def _optimize_model(self) -> None:
+        if _Feature.QUANTIZATION.is_enabled:
+            from kazu.quantization.int8_x86_quantizer import _Int8X86Quantizer
+
+            quantizer = _Int8X86Quantizer()
+            self.model = quantizer.quantize(
+                model=self.model,
+                tokenizer=self.tokeniser,
+                max_length=self.max_sequence_length,
+            )
+
+        if _Feature.INDUCTOR.is_enabled:
+            from torch._inductor import config
+
+            config.freezing = True
+
+            mode = "max-autotune" if _Feature.MAX_AUTOTUNE.is_enabled else None
+            self.model = torch.compile(self.model, mode=mode)
 
     @document_batch_step
     def __call__(self, docs: list[Document]) -> None:
