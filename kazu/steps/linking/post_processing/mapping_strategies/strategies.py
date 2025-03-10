@@ -2,6 +2,7 @@ import abc
 import itertools
 from abc import ABC
 from collections.abc import Iterable
+import re
 from typing import Optional
 
 from kazu.data import (
@@ -336,8 +337,9 @@ class SymbolMatchMappingStrategy(MappingStrategy):
 
 
 class SynNormIsSubStringMappingStrategy(MappingStrategy):
-    """For a :data:`~.CandidatesToMetrics`, see if any of their .synonym_norm are string
-    matches of the match_norm tokens based on whitespace tokenisation.
+    """For a :data:`~.CandidatesToMetrics`, see if any of their .synonym_norm are a
+    substring of the match_norm tokens, with a word boundary immediately before and
+    after.
 
     If exactly one element of :data:`~.CandidatesToMetrics` matches, prefer it.
 
@@ -373,7 +375,6 @@ class SynNormIsSubStringMappingStrategy(MappingStrategy):
         candidates: CandidatesToMetrics,
         parser_name: str,
     ) -> CandidatesToMetrics:
-        norm_tokens = set(ent_match_norm.split(" "))
 
         filtered_candidates_and_len = [
             (
@@ -384,7 +385,7 @@ class SynNormIsSubStringMappingStrategy(MappingStrategy):
                 len(candidate.synonym_norm),
             )
             for candidate, metrics in candidates.items()
-            if candidate.synonym_norm in norm_tokens
+            if self._regex_check_substring_words(candidate.synonym_norm, ent_match_norm)
             and len(candidate.synonym_norm) >= self.min_syn_norm_len_to_consider
         ]
         filtered_candidates_and_len.sort(key=lambda x: x[1], reverse=True)
@@ -397,6 +398,12 @@ class SynNormIsSubStringMappingStrategy(MappingStrategy):
                 candidate, metrics = candidates_and_len_list[0][0]
                 return {candidate: metrics}
         return {}
+
+    @staticmethod
+    def _regex_check_substring_words(possible_substring: str, full_string: str) -> bool:
+        # there should be a word boundary on either side
+        regexp = r"\b" + possible_substring + r"\b"
+        return bool(re.search(regexp, full_string))
 
 
 class StrongMatchMappingStrategy(MappingStrategy):
