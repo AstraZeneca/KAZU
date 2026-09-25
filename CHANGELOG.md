@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 <!-- towncrier release notes start -->
 
+## 2.4.0 - 2026-09-25
+
+### Features
+
+- Implement experimental W8A8 model quantization for TransformersModelForTokenClassificationNerStep (#84). (model_quantization)
+
+### Bugfixes
+
+- Upgrade Starlette to >=1.0.1, FastAPI to >=0.133.0,<0.139.2, and migrate server models to Pydantic v2. (starlette_fastapi_upgrade)
+
+
 ## 2.3.0 - 2024-12-17
 
 ### Features
