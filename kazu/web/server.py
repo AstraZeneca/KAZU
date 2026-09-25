@@ -46,7 +46,7 @@ from fastapi.security.http import HTTPAuthorizationCredentials
 from fastapi.staticfiles import StaticFiles
 from hydra.utils import instantiate, call
 from omegaconf import DictConfig
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, RootModel
 from ray import serve
 from starlette.requests import HTTPConnection, Request
 
@@ -204,49 +204,63 @@ _multiple_docs_mixed_type_example = [
 
 
 class SectionedWebDocument(BaseModel):
+    # mypy can't verify our loosely-typed example dicts against pydantic's
+    # recursive JsonValue type, since dict/list generics are invariant.
+    model_config = ConfigDict(
+        json_schema_extra={"example": _sectioned_doc_example}  # type:ignore[dict-item]
+    )
+
     sections: dict[str, str]
 
     def to_kazu_document(self) -> Document:
         return Document.from_named_section_texts(self.sections)
 
-    class Config:
-        schema_extra = {"example": _sectioned_doc_example}
-
 
 class SimpleWebDocument(BaseModel):
+    # type ignore as above
+    model_config = ConfigDict(
+        json_schema_extra={"example": _simple_doc_example}  # type:ignore[dict-item]
+    )
+
     text: str
 
     def to_kazu_document(self) -> Document:
         return Document.create_simple_document(self.text)
 
-    class Config:
-        schema_extra = {"example": _simple_doc_example}
-
 
 WebDocument = Union[SimpleWebDocument, SectionedWebDocument]
 
 
-class DocumentCollection(BaseModel):
-    __root__: Union[list[WebDocument], WebDocument]
+class DocumentCollection(RootModel):
+    # subclassing the parametrized ``RootModel[...]`` generic (rather than just
+    # annotating ``root``) creates a dynamically-generated intermediate generic
+    # class that cloudpickle can't reliably resolve by reference across
+    # processes (Ray Serve replicas run in separate processes), causing:
+    # AttributeError: Can't get attribute 'RootModel[Union[...]]' on
+    # <module 'pydantic.root_model'>
+    # So we only annotate the `root` field here instead of subscripting.
+    # type ignore below as in the classes above.
+    model_config = ConfigDict(
+        json_schema_extra={"example": _multiple_docs_mixed_type_example}  # type:ignore[dict-item]
+    )
+
+    root: Union[list[WebDocument], WebDocument]
 
     def convert_to_kazu_documents(self) -> list[Document]:
-        if isinstance(self.__root__, list):
-            return [doc.to_kazu_document() for doc in self.__root__]
+        if isinstance(self.root, list):
+            return [doc.to_kazu_document() for doc in self.root]
         else:
-            return [self.__root__.to_kazu_document()]
+            return [self.root.to_kazu_document()]
 
     def __len__(self) -> int:
-        if isinstance(self.__root__, list):
-            return len(self.__root__)
+        if isinstance(self.root, list):
+            return len(self.root)
         else:
             return 1
 
-    class Config:
-        schema_extra = {"example": _multiple_docs_mixed_type_example}
-
 
 # You appear not to be able to provide multiple examples in the
-# pydantic Config.schema_extra, so save this var for the Body
+# pydantic model_config's json_schema_extra, so save this var for the Body
 document_collection_examples = {
     "single_simple_doc": {
         "summary": "A single simple doc",
