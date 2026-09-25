@@ -3,7 +3,7 @@ name = "kazu"
 dynamic = ["version"]
 description = "Biomedical Named Entity Recognition and Entity Linking for Enterprise use cases"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 authors = [{ name = "AstraZeneca AI and Korea University" }]
 classifiers = [
   "Programming Language :: Python :: 3 :: Only",
