@@ -57,10 +57,17 @@ webserver = [
   # A new way was added in 0.103.0 , and we can handle both versions older than 0.99.0 and 0.103.0 or newer.
   # However, releases in between don't work.
   #  "fastapi!=0.99.0,!=0.99.1,!=0.100.0b1,!=0.100.0b2,!=0.100.0b3,!=0.100.0,!=0.100.1,!=0.101.0,!=0.101.1,!=0.102.0",
-  # UPDATE: 0.109.0 also no longer works. It seems like there's some incompatibility with ray serve here, so pinning to
-  # last known good version
-  "fastapi==0.108.0",
-  "pydantic<2.0",      # for the pinned spacy version pydantic should be > 1.8 as well.
+  # security requires starlette>=1.0.1. fastapi didn't drop its upper-bound pin on
+  # starlette until 0.133.0, and every fastapi release from 0.128.0 onwards requires
+  # pydantic>=2.7 (pydantic v1 support was dropped), so both bounds below move together.
+  # UPDATE: 0.139.2 also no longer works. It refactored route building to be
+  # thread-safe (fastapi PR #16013), which added a lock to the FastAPI app object
+  # that ray serve's @serve.ingress() can no longer pickle ("cannot pickle
+  # '_thread.lock' object"), so cap below that version until this is resolved
+  # upstream (by fastapi and/or ray).
+  "starlette>=1.0.1",
+  "fastapi>=0.133.0,<0.139.2",
+  "pydantic>=2.9,<3.0",
   "ray[serve]>=2.0.0",
   "PyJWT>=2.0.0",
 ]
@@ -191,7 +198,7 @@ module = [
   "mwparserfromhell.*",
   "gliner.*",
   "vertexai.*",
-  "pyarrow.*"
+  "pyarrow.*",
 ]
 ignore_missing_imports = true
 
